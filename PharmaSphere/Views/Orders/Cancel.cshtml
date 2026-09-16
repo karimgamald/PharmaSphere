@@ -1,0 +1,302 @@
+﻿@using PharmaSphere.Domain.Enums
+@model PharmaSphere.Domain.Entities.Order
+
+@{
+    ViewData["Title"] = "إلغاء الطلب";
+}
+
+<div dir="rtl" class="container-fluid py-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-x-circle text-danger me-2"></i>
+                إلغاء الطلب
+            </h2>
+
+            <p class="text-muted mb-0">
+                مراجعة الطلب قبل تنفيذ عملية الإلغاء
+            </p>
+        </div>
+
+        <a asp-action="Details"
+           asp-route-id="@Model.Id"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-right me-1"></i>
+            العودة للطلب
+        </a>
+
+    </div>
+
+
+    <!-- Warning -->
+    <div class="alert alert-warning border-0 shadow-sm">
+
+        <div class="d-flex align-items-start">
+
+            <i class="bi bi-exclamation-triangle-fill fs-3 me-3"></i>
+
+            <div>
+
+                <h5 class="fw-bold">
+                    هل أنت متأكد من إلغاء هذا الطلب؟
+                </h5>
+
+                <p class="mb-0">
+                    سيتم تغيير حالة الطلب إلى
+                    <strong>Cancelled</strong>
+                    وسيتم إرجاع الكميات المباعة إلى المخزون
+                    وتسجيل حركة مخزون جديدة.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <!-- Order Information -->
+        <div class="col-lg-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-header bg-white border-0 pt-4 px-4">
+
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-receipt me-2"></i>
+                        بيانات الطلب
+                    </h5>
+
+                </div>
+
+                <div class="card-body px-4">
+
+                    <div class="mb-3">
+
+                        <small class="text-muted d-block">
+                            رقم الطلب
+                        </small>
+
+                        <strong>
+                            #@Model.OrderNumber
+                        </strong>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <small class="text-muted d-block">
+                            تاريخ الطلب
+                        </small>
+
+                        <strong>
+                            @Model.OrderDate.ToLocalTime().ToString("dd/MM/yyyy hh:mm tt")
+                        </strong>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <small class="text-muted d-block">
+                            الحالة الحالية
+                        </small>
+
+                        <span class="badge bg-warning text-dark">
+                            @Model.OrderStatus
+                        </span>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <small class="text-muted d-block">
+                            عدد المنتجات
+                        </small>
+
+                        <strong>
+                            @Model.OrderItems.Count
+                        </strong>
+
+                    </div>
+
+
+                    <hr />
+
+
+                    <div class="d-flex justify-content-between">
+
+                        <span class="text-muted">
+                            الإجمالي
+                        </span>
+
+                        <strong class="text-danger fs-5">
+                            @Model.TotalAmount.ToString("N2") جنيه
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Products -->
+        <div class="col-lg-8">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header bg-white border-0 pt-4 px-4">
+
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-box-seam me-2"></i>
+                        المنتجات التي سيتم إرجاعها للمخزون
+                    </h5>
+
+                </div>
+
+
+                <div class="card-body px-4">
+
+                    <div class="table-responsive">
+
+                        <table class="table align-middle">
+
+                            <thead class="table-light">
+
+                                <tr>
+
+                                    <th>الدواء</th>
+
+                                    <th>Batch</th>
+
+                                    <th class="text-center">
+                                        الكمية
+                                    </th>
+
+                                    <th class="text-end">
+                                        السعر
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                @foreach (var item in Model.OrderItems)
+                                {
+                                    <tr>
+
+                                        <td>
+
+                                            <div class="fw-semibold">
+                                                @item.Medicine?.Name
+                                            </div>
+
+                                            @if (!string.IsNullOrWhiteSpace(
+                                                item.Medicine?.ScientificName))
+                                            {
+                                                <small class="text-muted">
+                                                    @item.Medicine.ScientificName
+                                                </small>
+                                            }
+
+                                        </td>
+
+
+                                        <td>
+
+                                            <span class="badge bg-light text-dark border">
+
+                                                @(item.MedicineBatch?.BatchNumber
+                                                    ?? "غير محدد")
+
+                                            </span>
+
+                                        </td>
+
+
+                                        <td class="text-center">
+
+                                            <span class="badge bg-primary">
+                                                @item.Quantity
+                                            </span>
+
+                                        </td>
+
+
+                                        <td class="text-end">
+
+                                            @item.TotalPrice.ToString("N2")
+                                            جنيه
+
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Actions -->
+    <div class="card border-0 shadow-sm mt-4">
+
+        <div class="card-body p-4">
+
+            <form asp-action="CancelConfirmed"
+                  asp-route-id="@Model.Id"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div class="d-flex justify-content-end gap-2">
+
+                    <a asp-action="Details"
+                       asp-route-id="@Model.Id"
+                       class="btn btn-light border px-4">
+
+                        <i class="bi bi-x-lg me-1"></i>
+                        لا، العودة
+                    </a>
+
+
+                    <button type="submit"
+                            class="btn btn-danger px-4"
+                            onclick="return confirm('هل أنت متأكد من إلغاء الطلب؟ سيتم إرجاع الكميات إلى المخزون.');">
+
+                        <i class="bi bi-trash3 me-1"></i>
+                        نعم، إلغاء الطلب
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

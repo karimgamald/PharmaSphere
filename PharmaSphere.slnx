@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="PharmaSphere.Application/PharmaSphere.Application.csproj" />
+  <Project Path="PharmaSphere.Domain/PharmaSphere.Domain.csproj" />
+  <Project Path="PharmaSphere.Infrastructure/PharmaSphere.Infrastructure.csproj" />
+  <Project Path="PharmaSphere/PharmaSphere.Web.csproj" />
+</Solution>

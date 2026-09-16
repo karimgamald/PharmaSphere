@@ -1,0 +1,30 @@
+﻿@model PharmaSphere.Domain.Entities.Prescription
+
+@{
+    ViewData["Title"] = "رفع روشتة جديدة";
+}
+
+<div class="container py-3" style="max-width: 600px;">
+    <div class="card border-0 shadow-sm rounded-4 p-4">
+        <h4 class="fw-bold text-dark mb-2"><i class="bi bi-cloud-arrow-up text-primary me-2"></i>رفع روشتة طبية</h4>
+        <p class="text-muted small mb-4">قم برفع صورة واضحة للروشتة وسيقوم الصيدلي براجعادها وتجهيز الطلب لك.</p>
+
+        <form asp-action="Upload" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold">اختر صورة الروشتة <span class="text-danger">*</span></label>
+                <input type="file" name="prescriptionImage" class="form-control rounded-3" accept="image/*" required />
+                <span asp-validation-for="ImagePath" class="text-danger small"></span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary px-4 rounded-3 fw-bold">
+                    <i class="bi bi-send me-1"></i> إرسال الروشتة
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary rounded-3">إلغاء</a>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,817 @@
+﻿@model PharmaSphere.Web.ViewModels.CartViewModel
+
+@{
+    ViewData["Title"] = "سلة المشتريات - PharmaSphere";
+
+    var cartItems =
+        Model.CartItems ?? new List<PharmaSphere.Web.ViewModels.CartItemViewModel>();
+
+    var hasItems =
+        cartItems.Any();
+
+    var hasPrescriptionItems =
+        cartItems.Any(x => x.RequiresPrescription);
+
+    var itemsCount =
+        cartItems.Sum(x => x.Quantity);
+
+    var subTotal =
+        cartItems.Sum(x => x.TotalPrice);
+
+    var deliveryFee =
+        hasItems ? Model.DeliveryFee : 0m;
+
+    var grandTotal =
+        subTotal + deliveryFee;
+}
+
+<div class="container-fluid px-3 px-lg-5 py-4" dir="rtl">
+
+    <!-- =========================
+         Page Header
+    ========================== -->
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+
+                <span class="bg-primary bg-opacity-10 text-primary rounded-3 p-2">
+                    <i class="bi bi-cart3 fs-4"></i>
+                </span>
+
+                <h2 class="fw-bold text-dark mb-0">
+                    سلة المشتريات
+                </h2>
+
+            </div>
+
+            @if (hasItems)
+            {
+                <p class="text-muted mb-0">
+                    لديك @itemsCount وحدة في سلة المشتريات
+                </p>
+            }
+            else
+            {
+                <p class="text-muted mb-0">
+                    راجع المنتجات قبل تأكيد طلبك
+                </p>
+            }
+
+        </div>
+
+
+        <a asp-action="Index"
+           class="btn btn-outline-primary rounded-3 px-4 py-2 fw-semibold">
+
+            <i class="bi bi-shop me-1"></i>
+
+            العودة إلى المتجر
+
+        </a>
+
+    </div>
+
+
+    <!-- =========================
+         Alerts
+    ========================== -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4"
+             role="alert">
+
+            <i class="bi bi-check-circle-fill me-2"></i>
+
+            <strong>
+                @TempData["SuccessMessage"]
+            </strong>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close">
+            </button>
+
+        </div>
+    }
+
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4"
+             role="alert">
+
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+
+            <strong>
+                @TempData["ErrorMessage"]
+            </strong>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close">
+            </button>
+
+        </div>
+    }
+
+
+    @if (hasItems)
+    {
+        <div class="row g-4">
+
+            <!-- =====================================================
+                 CART ITEMS
+            ====================================================== -->
+
+            <div class="col-xl-8">
+
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+                    <!-- Card Header -->
+
+                    <div class="card-header bg-white border-0 p-4">
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div>
+                                <h5 class="fw-bold text-dark mb-1">
+                                    المنتجات المختارة
+                                </h5>
+
+                                <span class="text-muted small">
+                                    @cartItems.Count() منتجات في السلة
+                                </span>
+                            </div>
+
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">
+
+                                <i class="bi bi-bag-check me-1"></i>
+
+                                @itemsCount وحدة
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Table -->
+
+                    <div class="table-responsive">
+
+                        <table class="table align-middle mb-0 cart-table">
+
+                            <thead class="table-light">
+
+                                <tr>
+
+                                    <th class="px-4 py-3">
+                                        الدواء
+                                    </th>
+
+                                    <th class="py-3 text-center">
+                                        السعر
+                                    </th>
+
+                                    <th class="py-3 text-center">
+                                        الكمية
+                                    </th>
+
+                                    <th class="py-3 text-center">
+                                        الإجمالي
+                                    </th>
+
+                                    <th class="px-4 py-3 text-center">
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                @foreach (var item in cartItems)
+                                {
+                                    <tr>
+
+                                        <!-- Medicine -->
+
+                                        <td class="px-4">
+
+                                            <div class="d-flex align-items-center gap-3">
+
+                                                <div class="medicine-icon bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center">
+
+                                                    <i class="bi bi-capsule fs-5"></i>
+
+                                                </div>
+
+                                                <div>
+
+                                                    <div class="fw-bold text-dark">
+                                                        @item.MedicineName
+                                                    </div>
+
+                                                    @if (!string.IsNullOrWhiteSpace(
+                                                        item.ScientificName))
+                                                    {
+                                                        <small class="text-muted d-block">
+                                                            @item.ScientificName
+                                                        </small>
+                                                    }
+
+
+                                                    @if (item.RequiresPrescription)
+                                                    {
+                                                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill mt-1">
+
+                                                            <i class="bi bi-file-earmark-medical me-1"></i>
+
+                                                            يتطلب وصفة
+
+                                                        </span>
+                                                    }
+
+                                                </div>
+
+                                            </div>
+
+                                        </td>
+
+
+                                        <!-- Unit Price -->
+
+                                        <td class="text-center">
+
+                                            <span class="fw-semibold text-dark">
+                                                @item.UnitPrice.ToString("N2")
+                                            </span>
+
+                                            <small class="text-muted d-block">
+                                                جنيه
+                                            </small>
+
+                                        </td>
+
+
+                                        <!-- Quantity -->
+
+                                        <td class="text-center">
+
+                                            <span class="quantity-badge">
+                                                @item.Quantity
+                                            </span>
+
+                                        </td>
+
+
+                                        <!-- Total -->
+
+                                        <td class="text-center">
+
+                                            <span class="fw-bold text-primary">
+                                                @item.TotalPrice.ToString("N2")
+                                            </span>
+
+                                            <small class="text-muted d-block">
+                                                جنيه
+                                            </small>
+
+                                        </td>
+
+
+                                        <!-- Remove -->
+
+                                        <td class="px-4 text-center">
+
+                                            <form asp-action="RemoveFromCart"
+                                                  method="post"
+                                                  class="d-inline">
+
+                                                @Html.AntiForgeryToken()
+
+                                                <input type="hidden"
+                                                       name="medicineId"
+                                                       value="@item.MedicineId" />
+
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-light text-danger rounded-3 remove-btn"
+                                                        title="إزالة من السلة"
+                                                        onclick="return confirm('هل تريد إزالة هذا الدواء من السلة؟');">
+
+                                                    <i class="bi bi-trash3"></i>
+
+                                                </button>
+
+                                            </form>
+
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    <!-- Cart Footer -->
+
+                    <div class="card-footer bg-white border-0 p-4">
+
+                        <div class="d-flex flex-column flex-sm-row justify-content-between gap-2">
+
+                            <a asp-action="Index"
+                               class="btn btn-outline-secondary rounded-3 px-4">
+
+                                <i class="bi bi-arrow-right me-1"></i>
+
+                                متابعة التسوق
+
+                            </a>
+
+                            <span class="text-muted small align-self-center">
+                                الأسعار النهائية يتم التحقق منها عند تأكيد الطلب
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =====================================================
+                 CHECKOUT
+            ====================================================== -->
+
+            <div class="col-xl-4">
+
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+                    <!-- Header -->
+
+                    <div class="card-header bg-primary text-white border-0 p-4">
+
+                        <div class="d-flex align-items-center gap-2">
+
+                            <i class="bi bi-truck fs-4"></i>
+
+                            <div>
+
+                                <h5 class="fw-bold mb-1">
+                                    إتمام الطلب
+                                </h5>
+
+                                <small class="opacity-75">
+                                    أدخل بيانات التوصيل
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="card-body p-4">
+
+                        <!-- =================================================
+                             CHECKOUT FORM
+                        ================================================== -->
+
+                        <form asp-action="Checkout"
+                              method="post"
+                              enctype="multipart/form-data">
+
+                            @Html.AntiForgeryToken()
+
+
+                            <!-- Delivery Address -->
+
+                            <div class="mb-3">
+
+                                <label asp-for="CheckoutInfo.DeliveryAddress"
+                                       class="form-label fw-semibold">
+
+                                    <i class="bi bi-geo-alt text-primary me-1"></i>
+
+                                    عنوان التوصيل
+
+                                    <span class="text-danger">*</span>
+
+                                </label>
+
+                                <textarea asp-for="CheckoutInfo.DeliveryAddress"
+                                          class="form-control rounded-3"
+                                          rows="3"
+                                          placeholder="أدخل عنوان التوصيل بالتفصيل..."
+                                          required></textarea>
+
+                                <span asp-validation-for="CheckoutInfo.DeliveryAddress"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+                            <!-- Phone -->
+
+                            <div class="mb-3">
+
+                                <label asp-for="CheckoutInfo.PhoneNumber"
+                                       class="form-label fw-semibold">
+
+                                    <i class="bi bi-telephone text-primary me-1"></i>
+
+                                    رقم الهاتف
+
+                                    <span class="text-danger">*</span>
+
+                                </label>
+
+                                <input asp-for="CheckoutInfo.PhoneNumber"
+                                       type="tel"
+                                       class="form-control rounded-3"
+                                       placeholder="01XXXXXXXXX"
+                                       required />
+
+                                <span asp-validation-for="CheckoutInfo.PhoneNumber"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+                            <!-- =================================================
+                                 PRESCRIPTION
+                            ================================================== -->
+                            @if (hasPrescriptionItems)
+                            {
+                                <div class="prescription-box mb-4">
+
+                                    <div class="d-flex align-items-start gap-2">
+
+                                        <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+
+                                        <div>
+
+                                            <div class="fw-bold text-dark mb-1">
+                                                الوصفة الطبية مطلوبة
+                                            </div>
+
+                                            <div class="text-muted small">
+                                                تحتوي السلة على دواء واحد أو أكثر
+                                                يتطلب وصفة طبية.
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="mb-4">
+
+                                    <label class="form-label fw-bold">
+
+                                        <i class="bi bi-file-earmark-medical text-danger me-1"></i>
+
+                                        إرفاق الوصفة الطبية
+
+                                        <span class="text-danger">*</span>
+
+                                    </label>
+
+                                    <input type="file"
+                                           name="prescriptionFile"
+                                           class="form-control rounded-3"
+                                           accept=".jpg,.jpeg,.png,.pdf"
+                                           required />
+
+                                    <div class="form-text">
+                                        JPG, JPEG, PNG أو PDF — الحد الأقصى 5 MB
+                                    </div>
+
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="mb-4">
+
+                                    <label class="form-label fw-semibold">
+
+                                        <i class="bi bi-file-earmark-medical text-primary me-1"></i>
+
+                                        إرفاق وصفة طبية
+
+                                        <span class="text-muted small">
+                                            (اختياري)
+                                        </span>
+
+                                    </label>
+
+                                    <input type="file"
+                                           name="prescriptionFile"
+                                           class="form-control rounded-3"
+                                           accept=".jpg,.jpeg,.png,.pdf" />
+
+                                    <div class="form-text">
+                                        JPG, JPEG, PNG أو PDF — الحد الأقصى 5 MB
+                                    </div>
+
+                                </div>
+                            }
+
+
+                            <!-- Validation -->
+
+                            <div asp-validation-summary="ModelOnly"
+                                 class="text-danger small mb-3">
+                            </div>
+
+
+                            <!-- =================================================
+                                 ORDER SUMMARY
+                            ================================================== -->
+
+                            <div class="summary-box rounded-4 p-3 mb-4">
+
+                                <h6 class="fw-bold mb-3">
+                                    ملخص الطلب
+                                </h6>
+
+
+                                <div class="d-flex justify-content-between mb-2">
+
+                                    <span class="text-muted">
+                                        إجمالي الأدوية
+                                    </span>
+
+                                    <span class="fw-semibold">
+                                        @subTotal.ToString("N2") جنيه
+                                    </span>
+
+                                </div>
+
+
+                                <div class="d-flex justify-content-between mb-2">
+
+                                    <span class="text-muted">
+                                        التوصيل
+                                    </span>
+
+                                    <span class="fw-semibold">
+                                        @deliveryFee.ToString("N2") جنيه
+                                    </span>
+
+                                </div>
+
+
+                                <hr />
+
+
+                                <div class="d-flex justify-content-between align-items-center">
+
+                                    <span class="fw-bold fs-5">
+                                        الإجمالي
+                                    </span>
+
+                                    <span class="fw-bold fs-4 text-success">
+                                        @grandTotal.ToString("N2")
+                                        <small class="fs-6">
+                                            جنيه
+                                        </small>
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Payment Method -->
+
+                            <div class="payment-method-box rounded-3 p-3 mb-4">
+
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <div class="payment-icon">
+
+                                        <i class="bi bi-cash-stack"></i>
+
+                                    </div>
+
+                                    <div>
+
+                                        <div class="fw-bold">
+                                            الدفع عند الاستلام
+                                        </div>
+
+                                        <small class="text-muted">
+                                            سيتم الدفع نقدًا عند استلام الطلب
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Submit -->
+
+                            <button type="submit"
+                                    class="btn btn-success btn-lg w-100 fw-bold rounded-3 py-3 shadow-sm">
+
+                                <i class="bi bi-check-circle me-1"></i>
+
+                                تأكيد وإرسال الطلب
+
+                            </button>
+
+
+                            <div class="text-center mt-3">
+
+                                <small class="text-muted">
+
+                                    <i class="bi bi-shield-check me-1"></i>
+
+                                    سيتم التحقق من توفر المنتجات والأسعار
+                                    قبل تأكيد الطلب.
+
+                                </small>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+    else
+    {
+        <!-- =====================================================
+             EMPTY CART
+        ====================================================== -->
+
+        <div class="card border-0 shadow-sm rounded-4">
+
+            <div class="card-body text-center py-5">
+
+                <div class="empty-cart-icon mx-auto mb-4">
+
+                    <i class="bi bi-cart-x"></i>
+
+                </div>
+
+                <h4 class="fw-bold text-dark mb-2">
+                    سلة المشتريات فارغة
+                </h4>
+
+                <p class="text-muted mb-4">
+                    لم تقم بإضافة أي أدوية إلى سلة المشتريات بعد.
+                </p>
+
+                <a asp-action="Index"
+                   class="btn btn-primary rounded-3 px-4 py-2 fw-semibold">
+
+                    <i class="bi bi-shop me-1"></i>
+
+                    تصفح المتجر
+
+                </a>
+
+            </div>
+
+        </div>
+    }
+
+</div>
+
+
+<!-- =========================================================
+     Styling
+========================================================== -->
+
+<style>
+
+    .cart-table th {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #495057;
+        white-space: nowrap;
+    }
+
+    .cart-table td {
+        border-color: #f0f0f0;
+    }
+
+    .medicine-icon {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+    }
+
+    .quantity-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 34px;
+        padding: 0 10px;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        font-weight: 700;
+    }
+
+    .remove-btn {
+        width: 38px;
+        height: 38px;
+        transition: all 0.2s ease;
+    }
+
+        .remove-btn:hover {
+            transform: translateY(-1px);
+        }
+
+    .summary-box {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+    }
+
+    .payment-method-box {
+        background: rgba(25, 135, 84, 0.06);
+        border: 1px solid rgba(25, 135, 84, 0.15);
+    }
+
+    .payment-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(25, 135, 84, 0.1);
+        color: #198754;
+        font-size: 1.2rem;
+    }
+
+    .prescription-box {
+        padding: 14px;
+        border-radius: 12px;
+        background: rgba(255, 193, 7, 0.08);
+        border: 1px solid rgba(255, 193, 7, 0.2);
+    }
+
+    .empty-cart-icon {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        color: #adb5bd;
+        font-size: 3rem;
+    }
+
+    .btn {
+        transition: all 0.2s ease;
+    }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+    @@media (max-width: 768px) {
+
+        .cart-table {
+            min-width: 700px;
+        }
+    }
+
+</style>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+}

@@ -1,0 +1,451 @@
+﻿```cshtml
+@model PharmaSphere.Domain.Entities.Medicine
+
+@{
+    ViewData["Title"] = $"{Model.Name} - التفاصيل";
+
+    var today = DateTime.UtcNow.Date;
+
+    // الشحنات الصالحة والمتاحة حاليًا
+    var validBatches = Model.Batches?
+        .Where(b => b.ExpiryDate >= today && b.RemainingUnits > 0)
+        .OrderBy(b => b.ExpiryDate)
+        .ToList()
+        ?? new List<PharmaSphere.Domain.Entities.MedicineBatch>();
+
+    // الشحنة الأقرب انتهاءً - FEFO
+    var currentActiveBatch = validBatches.FirstOrDefault();
+
+    decimal currentPrice = currentActiveBatch?.SellingPrice ?? 0m;
+
+    int availableStock = validBatches.Sum(b => b.RemainingUnits);
+
+    bool isAvailable = availableStock > 0;
+
+    bool hasPrice = currentPrice > 0;
+
+    int maxQuantity = availableStock;
+}
+
+<div class="container py-5" dir="rtl">
+
+    <!-- Header -->
+    <div class="mb-4">
+        <a asp-action="Index"
+           class="text-decoration-none text-muted small">
+            <i class="bi bi-arrow-right me-1"></i>
+            العودة إلى المتجر
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+        <div class="row g-0">
+
+            <!-- Medicine Information -->
+            <div class="col-lg-8">
+                <div class="p-4 p-md-5">
+
+                    <!-- Category + Availability -->
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+
+                        @if (Model.Category != null)
+                        {
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2">
+                                <i class="bi bi-grid me-1"></i>
+                                @Model.Category.Name
+                            </span>
+                        }
+
+                        @if (isAvailable)
+                        {
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2">
+                                <i class="bi bi-check-circle me-1"></i>
+                                متوفر
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-2">
+                                <i class="bi bi-x-circle me-1"></i>
+                                غير متوفر
+                            </span>
+                        }
+
+                        @if (Model.RequiresPrescription)
+                        {
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-2">
+                                <i class="bi bi-file-earmark-medical me-1"></i>
+                                يتطلب روشتة
+                            </span>
+                        }
+
+                    </div>
+
+                    <!-- Name -->
+                    <h1 class="fw-bold text-dark mb-2">
+                        @Model.Name
+                    </h1>
+
+                    <!-- Scientific Name -->
+                    @if (!string.IsNullOrWhiteSpace(Model.ScientificName))
+                    {
+                        <div class="mb-4">
+                            <span class="text-muted">الاسم العلمي:</span>
+                            <span class="fw-semibold text-dark">
+                                @Model.ScientificName
+                            </span>
+                        </div>
+                    }
+
+                    <hr class="my-4" />
+
+                    <!-- Medicine Details -->
+                    <div class="row g-4 mb-4">
+
+                        @if (!string.IsNullOrWhiteSpace(Model.ActiveIngredient))
+                        {
+                            <div class="col-md-6">
+                                <div class="detail-box">
+                                    <div class="detail-icon">
+                                        <i class="bi bi-capsule"></i>
+                                    </div>
+
+                                    <div>
+                                        <small class="text-muted d-block">
+                                            المادة الفعالة
+                                        </small>
+
+                                        <strong class="text-dark">
+                                            @Model.ActiveIngredient
+                                        </strong>
+
+                                        @if (!string.IsNullOrWhiteSpace(Model.ActiveIngredientConcentration))
+                                        {
+                                            <span class="badge bg-light text-dark border ms-1">
+                                                @Model.ActiveIngredientConcentration
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="col-md-6">
+                            <div class="detail-box">
+                                <div class="detail-icon">
+                                    <i class="bi bi-box-seam"></i>
+                                </div>
+
+                                <div>
+                                    <small class="text-muted d-block">
+                                        المخزون المتاح
+                                    </small>
+
+                                    <strong class="@(isAvailable ? "text-success" : "text-danger")">
+                                        @availableStock علبة
+                                    </strong>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Price -->
+                    <div class="price-section rounded-4 p-4 mb-4">
+
+                        <small class="text-muted d-block mb-1">
+                            السعر الحالي
+                        </small>
+
+                        @if (isAvailable && hasPrice)
+                        {
+                            <div class="d-flex align-items-baseline gap-2">
+
+                                <span class="display-6 fw-bold text-success">
+                                    @currentPrice.ToString("N2")
+                                </span>
+
+                                <span class="text-muted">
+                                    جنيه / علبة
+                                </span>
+
+                            </div>
+
+                            @if (currentActiveBatch != null)
+                            {
+                                <small class="text-muted d-block mt-2">
+                                    السعر حسب الدفعة المتاحة الأقرب انتهاءً.
+                                </small>
+                            }
+                        }
+                        else
+                        {
+                            <span class="fs-5 fw-semibold text-muted">
+                                السعر غير متاح حاليًا
+                            </span>
+                        }
+
+                    </div>
+
+                    <!-- Prescription Warning -->
+                    @if (Model.RequiresPrescription)
+                    {
+                        <div class="alert alert-warning border-0 rounded-4 d-flex align-items-start gap-3 mb-4">
+
+                            <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+
+                            <div>
+                                <strong class="d-block mb-1">
+                                    هذا الدواء يتطلب روشتة طبية
+                                </strong>
+
+                                <span class="small">
+                                    يجب رفع صورة روشتة طبية عند إتمام الطلب.
+                                    سيتم مراجعتها من قبل الصيدلي قبل تنفيذ الطلب.
+                                </span>
+                            </div>
+
+                        </div>
+                    }
+
+                    <!-- Add To Cart -->
+                    <form asp-action="AddToCart"
+                          method="post"
+                          id="addToCartForm">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="medicineId"
+                               value="@Model.Id" />
+
+                        <div class="row align-items-end g-3">
+
+                            <!-- Quantity -->
+                            <div class="col-sm-4 col-md-3">
+
+                                <label for="quantity"
+                                       class="form-label fw-semibold">
+                                    الكمية
+                                </label>
+
+                                <input type="number"
+                                       id="quantity"
+                                       name="quantity"
+                                       value="1"
+                                       min="1"
+                                       max="@maxQuantity"
+                                       class="form-control form-control-lg rounded-3 text-center"
+                                @(isAvailable ? "" : "disabled") />
+
+                            </div>
+
+                            <!-- Add Button -->
+                            <div class="col-sm-8 col-md-9">
+
+                                <button type="submit"
+                                        class="btn btn-primary btn-lg rounded-3 w-100 fw-semibold"
+                                    @(isAvailable ? "" : "disabled")>
+
+                                    <i class="bi bi-cart-plus me-2"></i>
+
+                                    @(isAvailable
+                                        ? "إضافة إلى السلة"
+                                        : "غير متوفر حاليًا")
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                    <!-- Back -->
+                    <div class="mt-4">
+
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary rounded-3 px-4">
+
+                            <i class="bi bi-arrow-right me-1"></i>
+                            العودة إلى المتجر
+
+                        </a>
+
+                        @if (isAvailable)
+                        {
+                            <a asp-action="Cart"
+                               class="btn btn-outline-primary rounded-3 px-4 ms-2">
+
+                                <i class="bi bi-cart3 me-1"></i>
+                                عرض السلة
+
+                            </a>
+                        }
+
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Side Summary -->
+            <div class="col-lg-4 bg-light">
+
+                <div class="h-100 p-4 p-md-5 d-flex flex-column justify-content-center">
+
+                    <div class="text-center mb-4">
+
+                        <div class="medicine-icon mx-auto mb-3">
+                            <i class="bi bi-capsule-pill"></i>
+                        </div>
+
+                        <h5 class="fw-bold mb-1">
+                            معلومات المنتج
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            @Model.Name
+                        </p>
+
+                    </div>
+
+                    <div class="summary-card bg-white rounded-4 p-4 shadow-sm">
+
+                        <div class="summary-row">
+                            <span class="text-muted">
+                                حالة المنتج
+                            </span>
+
+                            <strong class="@(isAvailable ? "text-success" : "text-danger")">
+                                @(isAvailable ? "متوفر" : "غير متوفر")
+                            </strong>
+                        </div>
+
+                        <div class="summary-row">
+                            <span class="text-muted">
+                                المخزون
+                            </span>
+
+                            <strong>
+                                @availableStock علبة
+                            </strong>
+                        </div>
+
+                        <div class="summary-row">
+                            <span class="text-muted">
+                                يتطلب روشتة
+                            </span>
+
+                            <strong>
+                                @(Model.RequiresPrescription ? "نعم" : "لا")
+                            </strong>
+                        </div>
+
+                        @if (hasPrice)
+                        {
+                            <div class="summary-row border-0 pb-0">
+
+                                <span class="text-muted">
+                                    سعر الوحدة
+                                </span>
+
+                                <strong class="text-success">
+                                    @currentPrice.ToString("N2") جنيه
+                                </strong>
+
+                            </div>
+                        }
+
+                    </div>
+
+                    @if (isAvailable)
+                    {
+                        <div class="mt-4 text-center">
+
+                            <small class="text-muted">
+                                <i class="bi bi-shield-check me-1"></i>
+                                السعر والمخزون يتم التحقق منهما عند تأكيد الطلب.
+                            </small>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+
+    .detail-box {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px;
+        background: #f8f9fa;
+        border-radius: 14px;
+        height: 100%;
+    }
+
+    .detail-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .price-section {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+    }
+
+    .summary-card {
+        border: 1px solid #edf0f2;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 0;
+        border-bottom: 1px solid #edf0f2;
+    }
+
+    .medicine-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 24px;
+        background: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 38px;
+    }
+
+    .btn {
+        transition: all 0.2s ease;
+    }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+    .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.12);
+    }
+
+</style>
+```

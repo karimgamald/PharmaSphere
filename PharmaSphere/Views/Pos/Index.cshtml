@@ -1,0 +1,1713 @@
+﻿@model PharmaSphere.Web.ViewModels.PosCheckoutViewModel
+
+@{
+    ViewData["Title"] = "شاشة الكاشير - POS";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+
+    @Html.AntiForgeryToken()
+
+    <!-- ========================= -->
+    <!-- Page Header -->
+    <!-- ========================= -->
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div class="d-flex align-items-center gap-3">
+
+            <div class="pos-icon">
+                <i class="bi bi-cart-check"></i>
+            </div>
+
+            <div>
+                <h3 class="fw-bold text-dark mb-1">
+                    شاشة الكاشير
+                </h3>
+
+                <p class="text-muted mb-0">
+                    البحث عن الأدوية وإضافة المنتجات إلى الفاتورة وإتمام عملية البيع
+                </p>
+            </div>
+
+        </div>
+
+        <span class="status-badge">
+            <span class="status-dot"></span>
+            النظام جاهز
+        </span>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <!-- ========================= -->
+        <!-- Medicines -->
+        <!-- ========================= -->
+
+        <div class="col-lg-7 col-xl-8">
+
+            <!-- Search -->
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-2 mb-3">
+
+                        <span class="section-icon">
+                            <i class="bi bi-search"></i>
+                        </span>
+
+                        <div>
+                            <h6 class="fw-bold mb-1">
+                                البحث عن دواء
+                            </h6>
+
+                            <small class="text-muted">
+                                امسح الباركود أو ابحث باسم الدواء
+                            </small>
+                        </div>
+
+                    </div>
+
+
+                    <div class="search-box">
+
+                        <span class="search-icon">
+                            <i class="bi bi-upc-scan"></i>
+                        </span>
+
+                        <input type="text"
+                               id="barcodeSearch"
+                               class="form-control form-control-lg search-input"
+                               placeholder="مسح الباركود أو البحث باسم الدواء / الاسم العلمي..."
+                               autocomplete="off"
+                               autofocus />
+
+                        <span class="search-hint">
+                            <kbd>Enter</kbd>
+                        </span>
+
+                    </div>
+
+
+                    <div class="form-text mt-2">
+
+                        <i class="bi bi-info-circle me-1"></i>
+
+                        يتم اختيار الدفعات تلقائيًا حسب أولوية الصلاحية
+                        <strong>FEFO</strong> عند إتمام البيع.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Medicine Table -->
+
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+                <div class="card-header bg-white border-0 p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div class="d-flex align-items-center gap-2">
+
+                            <span class="section-icon">
+                                <i class="bi bi-capsule"></i>
+                            </span>
+
+                            <div>
+
+                                <h6 class="fw-bold mb-1">
+                                    الأدوية المتاحة
+                                </h6>
+
+                                <small class="text-muted">
+                                    الأدوية التي يتوفر لها مخزون صالح للبيع
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
+
+                            <i class="bi bi-sort-down me-1"></i>
+
+                            FEFO
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-body p-0">
+
+                    <div class="table-responsive medicine-table-wrapper">
+
+                        <table class="table table-hover align-middle mb-0">
+
+                            <thead class="table-light sticky-top">
+
+                                <tr>
+
+                                    <th class="ps-4">
+                                        الدواء
+                                    </th>
+
+                                    <th>
+                                        الباركود
+                                    </th>
+
+                                    <th>
+                                        سعر البيع
+                                    </th>
+
+                                    <th>
+                                        المتاح
+                                    </th>
+
+                                    <th class="pe-4 text-end">
+                                        إجراء
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="medicineSearchResults">
+
+                                @if (Model.Medicines != null &&
+                                     Model.Medicines.Any())
+                                {
+                                    foreach (var medicine in Model.Medicines)
+                                    {
+                                        <tr>
+
+                                            <!-- Medicine -->
+
+                                            <td class="ps-4">
+
+                                                <div class="medicine-name">
+
+                                                    <div class="medicine-icon">
+
+                                                        <i class="bi bi-capsule"></i>
+
+                                                    </div>
+
+
+                                                    <div>
+
+                                                        <div class="fw-semibold">
+                                                            @medicine.Name
+                                                        </div>
+
+
+                                                        @if (!string.IsNullOrWhiteSpace(
+                                                            medicine.ScientificName))
+                                                        {
+                                                            <small class="text-muted">
+                                                                @medicine.ScientificName
+                                                            </small>
+                                                        }
+
+                                                    </div>
+
+                                                </div>
+
+                                            </td>
+
+
+                                            <!-- Barcode -->
+
+                                            <td>
+
+                                                @if (!string.IsNullOrWhiteSpace(
+                                                    medicine.Barcode))
+                                                {
+                                                    <span class="barcode-text">
+                                                        @medicine.Barcode
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">
+                                                        غير متوفر
+                                                    </span>
+                                                }
+
+                                            </td>
+
+
+                                            <!-- Price -->
+
+                                            <td>
+
+                                                <span class="fw-bold text-success">
+
+                                                    @medicine.Price.ToString("N2")
+
+                                                    ج.م
+
+                                                </span>
+
+                                            </td>
+
+
+                                            <!-- Stock -->
+
+                                            <td>
+
+                                                @if (medicine.AvailableStockUnits > 10)
+                                                {
+                                                    <span class="stock-badge stock-good">
+
+                                                        @medicine.AvailableStockUnits
+
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="stock-badge stock-low">
+
+                                                        @medicine.AvailableStockUnits
+
+                                                    </span>
+                                                }
+
+                                            </td>
+
+
+                                            <!-- Add -->
+
+                                            <td class="pe-4 text-end">
+
+                                                <button type="button"
+                                                        class="btn btn-primary btn-sm rounded-3 px-3 btn-add-medicine"
+                                                        data-id="@medicine.Id"
+                                                        data-name="@medicine.Name"
+                                                        data-price="@medicine.Price"
+                                                        data-stock="@medicine.AvailableStockUnits">
+
+                                                    <i class="bi bi-plus-lg me-1"></i>
+
+                                                    إضافة
+
+                                                </button>
+
+                                            </td>
+
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+
+                                        <td colspan="5"
+                                            class="text-center py-5 text-muted">
+
+                                            <div class="empty-state">
+
+                                                <div class="empty-icon">
+
+                                                    <i class="bi bi-box-seam"></i>
+
+                                                </div>
+
+
+                                                <h6 class="fw-bold text-dark mb-2">
+
+                                                    لا توجد أدوية متاحة
+
+                                                </h6>
+
+
+                                                <p class="small mb-0">
+
+                                                    لا يوجد حاليًا مخزون صالح للبيع.
+
+                                                </p>
+
+                                            </div>
+
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- Current Invoice -->
+        <!-- ========================= -->
+
+        <div class="col-lg-5 col-xl-4">
+
+            <div class="card border-0 shadow-sm rounded-4 invoice-card">
+
+                <!-- Invoice Header -->
+
+                <div class="card-header invoice-header text-white p-4 border-0">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="invoice-icon">
+
+                                <i class="bi bi-receipt"></i>
+
+                            </div>
+
+
+                            <div>
+
+                                <h6 class="fw-bold mb-1">
+                                    الفاتورة الحالية
+                                </h6>
+
+                                <small class="text-white-50">
+                                    عناصر البيع الحالية
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <span class="badge bg-primary">
+                            POS
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Invoice Items -->
+
+                <div class="card-body p-0">
+
+                    <div class="invoice-items">
+
+                        <ul class="list-group list-group-flush"
+                            id="invoiceItems">
+                        </ul>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Invoice Summary -->
+
+                <div class="card-footer bg-light p-4 border-0">
+
+                    <div class="summary-row mb-2">
+
+                        <span class="text-muted">
+                            الإجمالي الفرعي
+                        </span>
+
+                        <span class="fw-semibold"
+                              id="subTotal">
+
+                            0.00 ج.م
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="summary-row mb-3">
+
+                        <span class="text-muted">
+                            الخصم
+                        </span>
+
+                        <span class="fw-semibold text-danger"
+                              id="discountAmount">
+
+                            0.00 ج.م
+
+                        </span>
+
+                    </div>
+
+
+                    <hr />
+
+
+                    <div class="summary-total mb-4">
+
+                        <span class="fw-bold">
+                            المبلغ الإجمالي
+                        </span>
+
+                        <span class="total-value"
+                              id="grandTotal">
+
+                            0.00 ج.م
+
+                        </span>
+
+                    </div>
+
+
+                    <button type="button"
+                            class="btn btn-success btn-lg w-100 fw-bold rounded-3 py-3"
+                            id="btnCheckout">
+
+                        <i class="bi bi-check-circle me-2"></i>
+
+                        إتمام البيع
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- Styles -->
+<!-- ========================================================= -->
+
+<style>
+
+    .pos-icon {
+        width: 54px;
+        height: 54px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 15px;
+        background: rgba(13, 110, 253, .10);
+        color: #0d6efd;
+        font-size: 25px;
+    }
+
+
+    .section-icon {
+        width: 38px;
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: rgba(13, 110, 253, .08);
+        color: #0d6efd;
+    }
+
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 13px;
+        border-radius: 10px;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        color: #495057;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #198754;
+    }
+
+
+    .search-box {
+        position: relative;
+    }
+
+
+    .search-icon {
+        position: absolute;
+        right: 17px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+        color: #0d6efd;
+        font-size: 20px;
+        pointer-events: none;
+    }
+
+
+    .search-input {
+        min-height: 58px;
+        padding-right: 50px !important;
+        padding-left: 75px !important;
+        border-radius: 14px !important;
+    }
+
+
+        .search-input:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .10);
+        }
+
+
+    .search-hint {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+
+    .medicine-table-wrapper {
+        max-height: 540px;
+        overflow-y: auto;
+    }
+
+
+        .medicine-table-wrapper th {
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+
+        .medicine-table-wrapper td {
+            font-size: 13px;
+        }
+
+
+    .medicine-name {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+
+    .medicine-icon {
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: rgba(13, 110, 253, .08);
+        color: #0d6efd;
+        flex-shrink: 0;
+    }
+
+
+    .barcode-text {
+        font-family: monospace;
+        font-size: 12px;
+        color: #6c757d;
+    }
+
+
+    .stock-badge {
+        display: inline-flex;
+        min-width: 38px;
+        justify-content: center;
+        padding: 5px 9px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+
+    .stock-good {
+        background: rgba(25, 135, 84, .10);
+        color: #198754;
+    }
+
+
+    .stock-low {
+        background: rgba(255, 193, 7, .15);
+        color: #997404;
+    }
+
+
+    .empty-state {
+        padding: 15px;
+    }
+
+
+    .empty-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 18px;
+        background: rgba(13, 110, 253, .08);
+        color: #0d6efd;
+        font-size: 28px;
+    }
+
+
+    .invoice-header {
+        background: #212529;
+    }
+
+
+    .invoice-icon {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 11px;
+        background: rgba(255, 255, 255, .10);
+    }
+
+
+    .invoice-items {
+        min-height: 250px;
+        max-height: 390px;
+        overflow-y: auto;
+    }
+
+
+    .summary-row,
+    .summary-total {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+    }
+
+
+    .total-value {
+        font-size: 25px;
+        font-weight: 800;
+        color: #198754;
+    }
+
+
+    .card {
+        transition: box-shadow .2s ease;
+    }
+
+
+        .card:hover {
+            box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .07) !important;
+        }
+
+
+    .btn-add-medicine {
+        min-width: 85px;
+    }
+
+
+    @@media (max-width: 767.98px) {
+
+        .container-fluid {
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+
+
+        .search-hint {
+            display: none;
+        }
+
+
+        .search-input {
+            padding-left: 15px !important;
+        }
+    }
+
+</style>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+
+    <script>
+
+        // =========================================================
+        // POS Cart
+        // =========================================================
+
+        let cart = [];
+
+
+        // =========================================================
+        // Elements
+        // =========================================================
+
+        const searchInput =
+            document.getElementById("barcodeSearch");
+
+        const resultsContainer =
+            document.getElementById("medicineSearchResults");
+
+        const invoiceItems =
+            document.getElementById("invoiceItems");
+
+        const subTotalElement =
+            document.getElementById("subTotal");
+
+        const discountElement =
+            document.getElementById("discountAmount");
+
+        const grandTotalElement =
+            document.getElementById("grandTotal");
+
+        const checkoutButton =
+            document.getElementById("btnCheckout");
+
+
+        // =========================================================
+        // Attach Add Buttons
+        // =========================================================
+
+        function attachAddButtons() {
+
+            document
+                .querySelectorAll(".btn-add-medicine")
+                .forEach(button => {
+
+                    button.addEventListener("click", function() {
+
+                        const medicineId =
+                            Number(this.dataset.id);
+
+                        const medicineName =
+                            this.dataset.name;
+
+                        const price =
+                            Number(this.dataset.price);
+
+                        const availableStock =
+                            Number(this.dataset.stock);
+
+
+                        console.log("Add clicked:", {
+                            medicineId,
+                            medicineName,
+                            price,
+                            availableStock
+                        });
+
+
+                        addToCart(
+                            medicineId,
+                            medicineName,
+                            price,
+                            availableStock
+                        );
+
+                    });
+
+                });
+
+        }
+
+
+        // =========================================================
+        // Search
+        // =========================================================
+
+        let searchTimeout;
+
+
+        searchInput.addEventListener("input", function() {
+
+            clearTimeout(searchTimeout);
+
+
+            const query =
+                this.value.trim();
+
+
+            searchTimeout =
+                setTimeout(() => {
+
+                    searchMedicines(query);
+
+                }, 250);
+
+        });
+
+
+        async function searchMedicines(query) {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `/Pos/SearchMedicines?query=${encodeURIComponent(query)}`
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        `Search failed: ${response.status}`
+                    );
+
+                }
+
+
+                const medicines =
+                    await response.json();
+
+
+                renderMedicines(medicines);
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Search error:",
+                    error
+                );
+
+
+                resultsContainer.innerHTML = `
+
+                            <tr>
+
+                                <td colspan="5"
+                                    class="text-center py-4 text-danger">
+
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+
+                                    حدث خطأ أثناء البحث عن الأدوية.
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
+            }
+
+        }
+
+
+        // =========================================================
+        // Render Medicines
+        // =========================================================
+
+        function renderMedicines(medicines) {
+
+            if (!medicines || medicines.length === 0) {
+
+                resultsContainer.innerHTML = `
+
+                            <tr>
+
+                                <td colspan="5"
+                                    class="text-center py-5 text-muted">
+
+                                    <div class="empty-state">
+
+                                        <div class="empty-icon">
+
+                                            <i class="bi bi-search"></i>
+
+                                        </div>
+
+
+                                        <h6 class="fw-bold text-dark mb-2">
+
+                                            لا توجد نتائج
+
+                                        </h6>
+
+
+                                        <p class="small mb-0">
+
+                                            لم يتم العثور على دواء متاح بهذا البحث.
+
+                                        </p>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
+                return;
+            }
+
+
+            resultsContainer.innerHTML =
+
+                medicines.map(medicine => `
+
+                            <tr>
+
+                                <!-- Medicine -->
+
+                                <td class="ps-4">
+
+                                    <div class="medicine-name">
+
+                                        <div class="medicine-icon">
+
+                                            <i class="bi bi-capsule"></i>
+
+                                        </div>
+
+
+                                        <div>
+
+                                            <div class="fw-semibold">
+
+                                                ${escapeHtml(medicine.name)}
+
+                                            </div>
+
+
+                                            <small class="text-muted">
+
+                                                ${escapeHtml(
+                    medicine.scientificName || ""
+                )}
+
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- Barcode -->
+
+                                <td>
+
+                                    ${medicine.barcode
+
+                        ? `<span class="barcode-text">
+
+                                              ${escapeHtml(
+                            medicine.barcode
+                        )}
+
+                                           </span>`
+
+                        : `<span class="text-muted">
+
+                                              غير متوفر
+
+                                           </span>`
+                    }
+
+                                </td>
+
+
+                                <!-- Price -->
+
+                                <td>
+
+                                    <span class="fw-bold text-success">
+
+                                        ${Number(
+                        medicine.price
+                    ).toFixed(2)}
+
+                                        ج.م
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- Stock -->
+
+                                <td>
+
+                                    <span class="stock-badge ${medicine.availableStockUnits > 10
+                        ? "stock-good"
+                        : "stock-low"
+                    }">
+
+                                        ${medicine.availableStockUnits}
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- Add -->
+
+                                <td class="pe-4 text-end">
+
+                                    <button type="button"
+                                            class="btn btn-primary btn-sm rounded-3 px-3 btn-add-medicine"
+                                            data-id="${medicine.id}"
+                                            data-name="${escapeHtml(
+                        medicine.name
+                    )}"
+                                            data-price="${medicine.price}"
+                                            data-stock="${medicine.availableStockUnits}">
+
+                                        <i class="bi bi-plus-lg me-1"></i>
+
+                                        إضافة
+
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+                        `).join("");
+
+
+            // IMPORTANT:
+            // Search replaces the table HTML,
+            // so we must attach the click events again.
+
+            attachAddButtons();
+
+        }
+
+
+        // =========================================================
+        // Add To Cart
+        // =========================================================
+
+        function addToCart(
+            medicineId,
+            medicineName,
+            price,
+            availableStock) {
+
+
+            if (!medicineId) {
+
+                console.error(
+                    "Invalid medicine ID."
+                );
+
+                return;
+            }
+
+
+            if (availableStock <= 0) {
+
+                alert(
+                    "هذا الدواء غير متوفر في المخزون."
+                );
+
+                return;
+            }
+
+
+            const existing =
+                cart.find(
+                    x => x.medicineId === medicineId
+                );
+
+
+            if (existing) {
+
+                if (
+                    existing.quantity >=
+                    availableStock
+                ) {
+
+                    alert(
+                        "لا يمكن تجاوز الكمية المتاحة."
+                    );
+
+                    return;
+                }
+
+
+                existing.quantity++;
+
+            }
+            else {
+
+                cart.push({
+
+                    medicineId:
+                        medicineId,
+
+                    name:
+                        medicineName,
+
+                    quantity:
+                        1,
+
+                    // Display only.
+                    // The server gets the real
+                    // price from the database.
+
+                    price:
+                        Number(price),
+
+                    availableStock:
+                        Number(availableStock)
+
+                });
+
+            }
+
+
+            renderCart();
+
+        }
+
+
+        // =========================================================
+        // Increase Quantity
+        // =========================================================
+
+        function increaseQuantity(medicineId) {
+
+            const item =
+                cart.find(
+                    x => x.medicineId === medicineId
+                );
+
+
+            if (!item)
+                return;
+
+
+            if (
+                item.quantity >=
+                item.availableStock
+            ) {
+
+                alert(
+                    "لا يمكن تجاوز الكمية المتاحة."
+                );
+
+                return;
+            }
+
+
+            item.quantity++;
+
+            renderCart();
+
+        }
+
+
+        // =========================================================
+        // Decrease Quantity
+        // =========================================================
+
+        function decreaseQuantity(medicineId) {
+
+            const item =
+                cart.find(
+                    x => x.medicineId === medicineId
+                );
+
+
+            if (!item)
+                return;
+
+
+            item.quantity--;
+
+
+            if (item.quantity <= 0) {
+
+                cart =
+                    cart.filter(
+                        x =>
+                            x.medicineId !==
+                            medicineId
+                    );
+
+            }
+
+
+            renderCart();
+
+        }
+
+
+        // =========================================================
+        // Remove From Cart
+        // =========================================================
+
+        function removeFromCart(medicineId) {
+
+            cart =
+                cart.filter(
+                    x =>
+                        x.medicineId !==
+                        medicineId
+                );
+
+
+            renderCart();
+
+        }
+
+
+        // =========================================================
+        // Render Cart
+        // =========================================================
+
+        function renderCart() {
+
+            if (cart.length === 0) {
+
+                invoiceItems.innerHTML = `
+
+                            <li class="list-group-item text-center py-5 text-muted">
+
+                                <i class="bi bi-cart-x fs-1 d-block mb-2"></i>
+
+                                لا توجد منتجات في الفاتورة.
+
+                            </li>
+
+                        `;
+
+            }
+            else {
+
+                invoiceItems.innerHTML =
+
+                    cart.map(item => `
+
+                                <li class="list-group-item p-3">
+
+                                    <div class="d-flex justify-content-between gap-2">
+
+                                        <div>
+
+                                            <div class="fw-semibold">
+
+                                                ${escapeHtml(
+                        item.name
+                    )}
+
+                                            </div>
+
+
+                                            <small class="text-muted">
+
+                                                ${item.price.toFixed(2)}
+                                                ج.م
+
+                                            </small>
+
+                                        </div>
+
+
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger border-0"
+                                                onclick="removeFromCart(${item.medicineId})">
+
+                                            <i class="bi bi-trash"></i>
+
+                                        </button>
+
+                                    </div>
+
+
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+
+                                        <div class="btn-group"
+                                             dir="ltr">
+
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-secondary"
+                                                    onclick="decreaseQuantity(${item.medicineId})">
+
+                                                -
+
+                                            </button>
+
+
+                                            <span class="btn btn-sm btn-light disabled">
+
+                                                ${item.quantity}
+
+                                            </span>
+
+
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-secondary"
+                                                    onclick="increaseQuantity(${item.medicineId})">
+
+                                                +
+
+                                            </button>
+
+                                        </div>
+
+
+                                        <strong>
+
+                                            ${(
+                            item.price *
+                            item.quantity
+                        ).toFixed(2)}
+
+                                            ج.م
+
+                                        </strong>
+
+                                    </div>
+
+                                </li>
+
+                            `).join("");
+
+            }
+
+
+            calculateTotals();
+
+        }
+
+
+        // =========================================================
+        // Calculate Totals
+        // =========================================================
+
+        function calculateTotals() {
+
+            const subtotal =
+                cart.reduce(
+                    (sum, item) =>
+                        sum +
+                        (
+                            item.price *
+                            item.quantity
+                        ),
+                    0
+                );
+
+
+            subTotalElement.textContent =
+                `${subtotal.toFixed(2)} ج.م`;
+
+
+            // Discount is currently fixed at zero.
+            // It can be changed later to an input.
+
+            const discount = 0;
+
+
+            discountElement.textContent =
+                `${discount.toFixed(2)} ج.م`;
+
+
+            const total =
+                Math.max(
+                    subtotal - discount,
+                    0
+                );
+
+
+            grandTotalElement.textContent =
+                `${total.toFixed(2)} ج.م`;
+
+        }
+
+
+        // =========================================================
+        // Checkout
+        // =========================================================
+
+        checkoutButton.addEventListener(
+            "click",
+            checkout
+        );
+
+
+        async function checkout() {
+
+            if (cart.length === 0) {
+
+                alert(
+                    "الفاتورة فارغة."
+                );
+
+                return;
+            }
+
+
+            checkoutButton.disabled = true;
+
+
+            const originalText =
+                checkoutButton.innerHTML;
+
+
+            checkoutButton.innerHTML = `
+
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+
+                        جاري إتمام البيع...
+
+                    `;
+
+
+            try {
+
+                const tokenElement =
+                    document.querySelector(
+                        'input[name="__RequestVerificationToken"]'
+                    );
+
+
+                const token =
+                    tokenElement
+                        ? tokenElement.value
+                        : "";
+
+
+                const response =
+                    await fetch(
+                        "/Pos/Checkout",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json",
+
+                                "RequestVerificationToken":
+                                    token
+
+                            },
+
+
+                            body:
+                                JSON.stringify({
+
+                                    items:
+
+                                        cart.map(
+                                            item => ({
+
+                                                medicineId:
+                                                    item.medicineId,
+
+                                                quantity:
+                                                    item.quantity,
+
+                                                // Display value only.
+                                                // Server must validate
+                                                // and calculate the actual
+                                                // price from MedicineBatch.
+
+                                                unitPrice:
+                                                    item.price
+
+                                            })
+                                        ),
+
+
+                                    discountAmount:
+                                        0
+
+                                })
+
+                        }
+                    );
+
+
+                let result;
+
+
+                try {
+
+                    result =
+                        await response.json();
+
+                }
+                catch {
+
+                    throw new Error(
+                        "Invalid server response."
+                    );
+
+                }
+
+
+                if (!response.ok) {
+
+                    alert(
+                        result.message ||
+                        "حدث خطأ أثناء تنفيذ عملية البيع."
+                    );
+
+                    return;
+                }
+
+
+                if (!result.success) {
+
+                    alert(
+                        result.message ||
+                        "فشل إتمام عملية البيع."
+                    );
+
+                    return;
+                }
+
+
+                alert(`
+
+        تم البيع بنجاح.
+
+        رقم الفاتورة:
+        ${result.orderNumber}
+
+        الإجمالي:
+        ${Number(result.total).toFixed(2)} ج.م
+
+                        `);
+
+
+                // Clear cart
+
+                cart = [];
+
+
+                renderCart();
+
+
+                // Refresh medicines
+
+                await searchMedicines(
+                    searchInput.value.trim()
+                );
+
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Checkout error:",
+                    error
+                );
+
+
+                alert(
+                    "حدث خطأ أثناء الاتصال بالخادم."
+                );
+
+            }
+            finally {
+
+                checkoutButton.disabled = false;
+
+                checkoutButton.innerHTML =
+                    originalText;
+
+            }
+
+        }
+
+
+        // =========================================================
+        // HTML Escape
+        // =========================================================
+
+        function escapeHtml(value) {
+
+            return String(value ?? "")
+                .replaceAll(
+                    "&",
+                    "&amp;"
+                )
+                .replaceAll(
+                    "<",
+                    "&lt;"
+                )
+                .replaceAll(
+                    ">",
+                    "&gt;"
+                )
+                .replaceAll(
+                    '"',
+                    "&quot;"
+                )
+                .replaceAll(
+                    "'",
+                    "&#039;"
+                );
+
+        }
+
+
+        // =========================================================
+        // Initial Page Load
+        // =========================================================
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function() {
+
+                // Display empty cart initially.
+
+                renderCart();
+
+
+                // IMPORTANT:
+                // The medicines are rendered by Razor on
+                // the first page load, so attach events
+                // to those buttons.
+
+                attachAddButtons();
+
+
+                // Focus search box.
+
+                if (searchInput) {
+
+                    searchInput.focus();
+
+                }
+
+            }
+        );
+
+    </script>
+}

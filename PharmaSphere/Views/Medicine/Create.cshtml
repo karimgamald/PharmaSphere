@@ -1,0 +1,408 @@
+﻿```cshtml
+@model PharmaSphere.Web.ViewModels.MedicineFormViewModel
+
+@{
+    ViewData["Title"] = "إضافة دواء جديد";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="bg-primary bg-opacity-10 text-primary rounded-3 p-2">
+                    <i class="bi bi-capsule-pill fs-5"></i>
+                </span>
+
+                <h3 class="fw-bold text-dark mb-0">
+                    إضافة دواء جديد
+                </h3>
+            </div>
+
+            <p class="text-muted small mb-0">
+                تسجيل البيانات الأساسية للدواء والمادة الفعالة.
+            </p>
+        </div>
+
+        <a asp-action="Index"
+           class="btn btn-outline-secondary rounded-3 px-4">
+            <i class="bi bi-arrow-right me-1"></i>
+            العودة إلى قائمة الأدوية
+        </a>
+    </div>
+
+
+    <form asp-action="Create"
+          method="post"
+          enctype="multipart/form-data">
+
+        <div class="row justify-content-center g-4">
+
+            <!-- Main Form -->
+            <div class="col-xl-8 col-lg-9">
+
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+                    <!-- Card Header -->
+                    <div class="card-header bg-primary text-white border-0 py-3 px-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-info-circle fs-5"></i>
+
+                            <div>
+                                <h6 class="fw-bold mb-0">
+                                    البيانات الأساسية للدواء
+                                </h6>
+
+                                <small class="opacity-75">
+                                    أدخل بيانات الدواء بدقة
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="card-body p-4">
+
+                        <!-- Validation Summary -->
+                        <div asp-validation-summary="ModelOnly"
+                             class="alert alert-danger rounded-3"
+                             role="alert">
+                        </div>
+
+
+                        <div class="row g-4">
+
+                            <!-- Medicine Name -->
+                            <div class="col-md-6">
+                                <label asp-for="Name"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <input asp-for="Name"
+                                       class="form-control rounded-3"
+                                       placeholder="مثال: Panadol Extra"
+                                       autocomplete="off" />
+
+                                <span asp-validation-for="Name"
+                                      class="text-danger small">
+                                </span>
+                            </div>
+
+
+                            <!-- Scientific Name -->
+                            <div class="col-md-6">
+                                <label asp-for="ScientificName"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <input asp-for="ScientificName"
+                                       class="form-control rounded-3"
+                                       placeholder="مثال: Paracetamol + Caffeine"
+                                       autocomplete="off" />
+
+                                <span asp-validation-for="ScientificName"
+                                      class="text-danger small">
+                                </span>
+                            </div>
+
+
+                            <!-- Active Ingredient -->
+                            <div class="col-md-6">
+                                <label asp-for="ActiveIngredient"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <input asp-for="ActiveIngredient"
+                                       class="form-control rounded-3"
+                                       placeholder="مثال: Paracetamol"
+                                       autocomplete="off" />
+
+                                <span asp-validation-for="ActiveIngredient"
+                                      class="text-danger small">
+                                </span>
+                            </div>
+
+
+                            <!-- Concentration -->
+                            <div class="col-md-6">
+                                <label asp-for="ActiveIngredientConcentration"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <input asp-for="ActiveIngredientConcentration"
+                                       class="form-control rounded-3"
+                                       placeholder="مثال: 500 mg"
+                                       autocomplete="off" />
+
+                                <span asp-validation-for="ActiveIngredientConcentration"
+                                      class="text-danger small">
+                                </span>
+                            </div>
+
+
+                            <!-- Category -->
+                            <div class="col-md-6">
+                                <label asp-for="CategoryId"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <select asp-for="CategoryId"
+                                        class="form-select rounded-3"
+                                        asp-items="Model.Categories">
+
+                                    <option value="">
+                                        -- اختر التصنيف --
+                                    </option>
+
+                                </select>
+
+                                <span asp-validation-for="CategoryId"
+                                      class="text-danger small">
+                                </span>
+                            </div>
+
+
+                            <!-- Barcode -->
+                            <div class="col-md-6">
+                                <label asp-for="Barcode"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">
+                                        <i class="bi bi-upc-scan"></i>
+                                    </span>
+
+                                    <input asp-for="Barcode"
+                                           class="form-control"
+                                           placeholder="أدخل أو امسح الباركود"
+                                           autocomplete="off" />
+                                </div>
+
+                                <span asp-validation-for="Barcode"
+                                      class="text-danger small">
+                                </span>
+                            </div>
+
+
+                            <!-- Units Per Box -->
+                            <div class="col-md-6">
+                                <label asp-for="UnitsPerBox"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <input asp-for="UnitsPerBox"
+                                       type="number"
+                                       min="1"
+                                       class="form-control rounded-3" />
+
+                                <span asp-validation-for="UnitsPerBox"
+                                      class="text-danger small">
+                                </span>
+
+                                <div class="form-text">
+                                    عدد الوحدات الموجودة داخل العبوة.
+                                </div>
+                            </div>
+
+
+                            <!-- Prescription -->
+                            <div class="col-12">
+
+                                <div class="bg-light border rounded-3 p-3">
+
+                                    <div class="form-check form-switch m-0">
+
+                                        <input asp-for="RequiresPrescription"
+                                               class="form-check-input"
+                                               type="checkbox"
+                                               role="switch" />
+
+                                        <label asp-for="RequiresPrescription"
+                                               class="form-check-label fw-semibold">
+                                            يتطلب وصفة طبية
+                                        </label>
+
+                                    </div>
+
+                                    <small class="text-muted d-block mt-2">
+                                        فعّل هذا الخيار إذا كان صرف الدواء
+                                        يتطلب وصفة طبية معتمدة.
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <!-- Actions -->
+                <div class="card border-0 shadow-sm rounded-4 mt-4">
+                    <div class="card-body p-3">
+
+                        <div class="row g-2">
+
+                            <div class="col-md-8">
+                                <button type="submit"
+                                        class="btn btn-success btn-lg fw-bold rounded-3 w-100">
+
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    حفظ الدواء
+                                </button>
+                            </div>
+
+                            <div class="col-md-4">
+                                <a asp-action="Index"
+                                   class="btn btn-outline-secondary btn-lg rounded-3 w-100">
+
+                                    <i class="bi bi-x-circle me-1"></i>
+                                    إلغاء
+                                </a>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- Information Sidebar -->
+            <div class="col-xl-4 col-lg-9">
+
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+                    <div class="card-body p-4">
+
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="bg-success bg-opacity-10 text-success rounded-3 p-2">
+                                <i class="bi bi-diagram-3 fs-5"></i>
+                            </span>
+
+                            <h6 class="fw-bold mb-0">
+                                دورة الدواء في النظام
+                            </h6>
+                        </div>
+
+
+                        <div class="d-flex gap-3 mb-4">
+
+                            <div class="text-primary fs-5">
+                                <i class="bi bi-1-circle-fill"></i>
+                            </div>
+
+                            <div>
+                                <h6 class="fw-bold mb-1">
+                                    تعريف الدواء
+                                </h6>
+
+                                <p class="text-muted small mb-0">
+                                    يتم تسجيل البيانات الأساسية والمادة الفعالة.
+                                </p>
+                            </div>
+
+                        </div>
+
+
+                        <div class="d-flex gap-3 mb-4">
+
+                            <div class="text-primary fs-5">
+                                <i class="bi bi-2-circle-fill"></i>
+                            </div>
+
+                            <div>
+                                <h6 class="fw-bold mb-1">
+                                    إضافة أمر شراء
+                                </h6>
+
+                                <p class="text-muted small mb-0">
+                                    يتم تسجيل المورد والكمية وسعر الشراء والبيع.
+                                </p>
+                            </div>
+
+                        </div>
+
+
+                        <div class="d-flex gap-3 mb-4">
+
+                            <div class="text-primary fs-5">
+                                <i class="bi bi-3-circle-fill"></i>
+                            </div>
+
+                            <div>
+                                <h6 class="fw-bold mb-1">
+                                    إنشاء Batch
+                                </h6>
+
+                                <p class="text-muted small mb-0">
+                                    لكل دفعة رقم تشغيل وتاريخ انتهاء وأسعار خاصة بها.
+                                </p>
+                            </div>
+
+                        </div>
+
+
+                        <div class="d-flex gap-3">
+
+                            <div class="text-success fs-5">
+                                <i class="bi bi-4-circle-fill"></i>
+                            </div>
+
+                            <div>
+                                <h6 class="fw-bold mb-1">
+                                    متابعة المخزون
+                                </h6>
+
+                                <p class="text-muted small mb-0">
+                                    يتم تحديث المخزون من خلال حركات المخزون
+                                    مثل الشراء والبيع والمرتجعات.
+                                </p>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <!-- Important Note -->
+                <div class="alert alert-info border-0 rounded-4 shadow-sm">
+
+                    <div class="d-flex gap-3">
+
+                        <i class="bi bi-lightbulb fs-4"></i>
+
+                        <div>
+                            <h6 class="fw-bold">
+                                ملاحظة مهمة
+                            </h6>
+
+                            <p class="small mb-0">
+                                سعر الدواء والكمية وتاريخ الانتهاء
+                                لا يتم تسجيلها هنا، لأنها تختلف من Batch
+                                إلى أخرى ويتم إدارتها من خلال المخزون وأوامر الشراء.
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,356 @@
+﻿@model PharmaSphere.Web.ViewModels.CreateReturnViewModel
+
+@{
+    ViewData["Title"] = "تسجيل مرتجع";
+}
+
+<div class="container py-4" dir="rtl">
+
+    <div class="mb-4">
+
+        <a asp-action="Index"
+           class="text-decoration-none">
+
+            <i class="bi bi-arrow-right"></i>
+            العودة إلى المرتجعات
+
+        </a>
+
+        <h2 class="fw-bold mt-3">
+            تسجيل مرتجع
+        </h2>
+
+        <p class="text-muted">
+            تسجيل المنتجات المرتجعة وإعادتها إلى المخزون
+        </p>
+
+    </div>
+
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body p-4">
+
+            <form asp-action="Create"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger">
+                </div>
+
+
+                <!-- Order -->
+
+                <div class="mb-4">
+
+                    <label asp-for="OrderId"
+                           class="form-label fw-semibold">
+
+                        الطلب
+
+                    </label>
+
+                    <select asp-for="OrderId"
+                            asp-items="Model.Orders"
+                            class="form-select"
+                            id="OrderId">
+
+                        <option value="">
+                            -- اختر الطلب --
+                        </option>
+
+                    </select>
+
+                    <span asp-validation-for="OrderId"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- Order Item -->
+
+                <div class="mb-4">
+
+                    <label asp-for="OrderItemId"
+                           class="form-label fw-semibold">
+
+                        المنتج
+
+                    </label>
+
+                    <select asp-for="OrderItemId"
+                            class="form-select"
+                            id="OrderItemId"
+                            disabled>
+
+                        <option value="">
+                            -- اختر الطلب أولاً --
+                        </option>
+
+                    </select>
+
+                    <span asp-validation-for="OrderItemId"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- Quantity -->
+
+                <div class="mb-4">
+
+                    <label asp-for="ReturnedUnits"
+                           class="form-label fw-semibold">
+
+                        الكمية المرتجعة
+
+                    </label>
+
+                    <input asp-for="ReturnedUnits"
+                           type="number"
+                           min="1"
+                           class="form-control"
+                           id="ReturnedUnits"
+                           disabled />
+
+                    <div class="form-text"
+                         id="quantityHelp">
+                    </div>
+
+                    <span asp-validation-for="ReturnedUnits"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- Reason -->
+
+                <div class="mb-4">
+
+                    <label asp-for="Reason"
+                           class="form-label fw-semibold">
+
+                        سبب المرتجع
+
+                    </label>
+
+                    <textarea asp-for="Reason"
+                              class="form-control"
+                              rows="4"
+                              placeholder="اكتب سبب المرتجع...">
+                    </textarea>
+
+                    <span asp-validation-for="Reason"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- Actions -->
+
+                <div class="d-flex gap-2">
+
+                    <button type="submit"
+                            class="btn btn-primary"
+                            id="submitBtn"
+                            disabled>
+
+                        <i class="bi bi-check-lg"></i>
+                        تسجيل المرتجع
+
+                    </button>
+
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary">
+
+                        إلغاء
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        const orderSelect =
+            document.getElementById("OrderId");
+
+        const itemSelect =
+            document.getElementById("OrderItemId");
+
+        const quantityInput =
+            document.getElementById("ReturnedUnits");
+
+        const quantityHelp =
+            document.getElementById("quantityHelp");
+
+        const submitBtn =
+            document.getElementById("submitBtn");
+
+
+        orderSelect.addEventListener("change", async function() {
+
+            const orderId = this.value;
+
+            itemSelect.innerHTML =
+                '<option value="">جاري تحميل المنتجات...</option>';
+
+            itemSelect.disabled = true;
+
+            quantityInput.disabled = true;
+
+            submitBtn.disabled = true;
+
+
+            if (!orderId) {
+
+                itemSelect.innerHTML =
+                    '<option value="">-- اختر الطلب أولاً --</option>';
+
+                return;
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        `/Returns/GetOrderItems?orderId=${orderId}`
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        `HTTP ${response.status}`
+                    );
+
+                }
+
+
+                const items =
+                    await response.json();
+
+
+                itemSelect.innerHTML =
+                    '<option value="">-- اختر المنتج --</option>';
+
+
+                if (items.length === 0) {
+
+                    itemSelect.innerHTML =
+                        '<option value="">لا توجد منتجات في هذا الطلب</option>';
+
+                    return;
+                }
+
+
+                items.forEach(item => {
+
+                    const option =
+                        document.createElement("option");
+
+                    option.value = item.id;
+
+                    option.textContent =
+                        `${item.medicineName} | Batch: ${item.batchNumber} | الكمية: ${item.quantity} | السعر: ${item.unitPrice.toFixed(2)} ج.م`;
+
+                    option.dataset.quantity =
+                        item.quantity;
+
+                    itemSelect.appendChild(option);
+
+                });
+
+
+                itemSelect.disabled = false;
+
+            }
+            catch (error) {
+
+                console.error(error);
+
+                itemSelect.innerHTML =
+                    '<option value="">حدث خطأ أثناء تحميل المنتجات</option>';
+
+            }
+
+        });
+
+
+        itemSelect.addEventListener("change", function() {
+
+            const option =
+                this.options[this.selectedIndex];
+
+
+            if (!this.value) {
+
+                quantityInput.disabled = true;
+
+                submitBtn.disabled = true;
+
+                quantityHelp.textContent = "";
+
+                return;
+
+            }
+
+
+            const maxQuantity =
+                parseInt(option.dataset.quantity);
+
+
+            quantityInput.max =
+                maxQuantity;
+
+            quantityInput.value = "";
+
+            quantityInput.disabled = false;
+
+            quantityHelp.textContent =
+                `الحد الأقصى للإرجاع: ${maxQuantity} وحدة`;
+
+            submitBtn.disabled = false;
+
+        });
+
+
+        quantityInput.addEventListener("input", function() {
+
+            const max =
+                parseInt(this.max);
+
+            const value =
+                parseInt(this.value);
+
+
+            if (value > max) {
+
+                this.value = max;
+
+            }
+
+        });
+
+    </script>
+}

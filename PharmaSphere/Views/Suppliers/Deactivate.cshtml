@@ -1,0 +1,111 @@
+﻿@model PharmaSphere.Domain.Entities.Supplier
+
+@{
+    ViewData["Title"] = "تعطيل المورد";
+}
+
+<div class="container py-5" dir="rtl" style="max-width: 600px;">
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+        <!-- Header -->
+        <div class="card-header bg-white border-0 text-center p-4">
+
+            <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex p-3 mb-3">
+                <i class="bi bi-pause-circle fs-2"></i>
+            </div>
+
+            <h4 class="fw-bold text-dark mb-2">
+                تعطيل المورد
+            </h4>
+
+            <p class="text-muted mb-0">
+                هل تريد تعطيل هذا المورد؟
+            </p>
+
+        </div>
+
+
+        <!-- Supplier Information -->
+        <div class="card-body p-4">
+
+            <div class="bg-light rounded-4 p-4 mb-4">
+
+                <div class="d-flex align-items-center gap-3">
+
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3">
+                        <i class="bi bi-building fs-4"></i>
+                    </div>
+
+                    <div>
+                        <div class="text-muted small">
+                            المورد
+                        </div>
+
+                        <div class="fw-bold fs-5 text-dark">
+                            @Model.Name
+                        </div>
+
+                        <div class="text-muted small mt-1">
+                            رقم المورد: #@Model.Id
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Warning -->
+            <div class="alert alert-warning border-0 rounded-3 d-flex gap-2">
+
+                <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+
+                <div>
+                    <div class="fw-semibold">
+                        ماذا سيحدث؟
+                    </div>
+
+                    <div class="small">
+                        لن يتم حذف المورد أو أوامر الشراء المرتبطة به.
+                        سيتم فقط تعطيله ولن يكون متاحًا للاستخدام في أوامر الشراء الجديدة.
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- Actions -->
+            <form asp-action="Deactivate"
+                  asp-route-id="@Model.Id"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div class="d-flex justify-content-between gap-2 mt-4">
+
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary rounded-3 px-4">
+
+                        <i class="bi bi-arrow-right me-1"></i>
+                        إلغاء
+
+                    </a>
+
+                    <button type="submit"
+                            class="btn btn-warning rounded-3 px-4 fw-bold">
+
+                        <i class="bi bi-pause-circle me-1"></i>
+                        نعم، تعطيل المورد
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

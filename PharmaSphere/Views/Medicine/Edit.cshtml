@@ -1,0 +1,460 @@
+﻿@model PharmaSphere.Web.ViewModels.MedicineFormViewModel
+
+@{
+    ViewData["Title"] = $"تعديل دواء - {Model.Name}";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+
+            <div class="d-flex align-items-center gap-2 mb-1">
+
+                <span class="bg-warning bg-opacity-10 text-warning rounded-3 p-2">
+                    <i class="bi bi-pencil-square fs-4"></i>
+                </span>
+
+                <div>
+
+                    <h3 class="fw-bold text-dark mb-0">
+                        تعديل الدواء
+                    </h3>
+
+                    <p class="text-muted small mb-0">
+                        تحديث بيانات:
+                        <span class="fw-semibold text-dark">
+                            @Model.Name
+                        </span>
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <a asp-action="Index"
+           class="btn btn-outline-secondary px-4 rounded-3">
+
+            <i class="bi bi-arrow-right me-1"></i>
+            العودة إلى قائمة الأدوية
+
+        </a>
+
+    </div>
+
+
+    <div class="row justify-content-center g-4">
+
+        <!-- Form -->
+        <div class="col-xl-8 col-lg-9">
+
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+                <div class="card-header bg-warning bg-opacity-10 border-0 py-3 px-4">
+
+                    <div class="d-flex align-items-center gap-2">
+
+                        <i class="bi bi-pencil-square text-warning fs-5"></i>
+
+                        <div>
+
+                            <h6 class="fw-bold mb-0">
+                                بيانات الدواء
+                            </h6>
+
+                            <small class="text-muted">
+                                تعديل بيانات الكتالوج فقط
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-body p-4">
+
+                    <form asp-action="Edit"
+                          method="post"
+                          enctype="multipart/form-data">
+
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="ImagePath" />
+
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="alert alert-danger rounded-3">
+                        </div>
+
+
+                        <div class="row g-4">
+
+                            <!-- Name -->
+                            <div class="col-md-6">
+
+                                <label asp-for="Name"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <input asp-for="Name"
+                                       class="form-control rounded-3"
+                                       autocomplete="off" />
+
+                                <span asp-validation-for="Name"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+                            <!-- Scientific Name -->
+                            <div class="col-md-6">
+
+                                <label asp-for="ScientificName"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <input asp-for="ScientificName"
+                                       class="form-control rounded-3"
+                                       autocomplete="off" />
+
+                                <span asp-validation-for="ScientificName"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+                            <!-- Active Ingredient -->
+                            <div class="col-md-6">
+
+                                <label asp-for="ActiveIngredient"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <input asp-for="ActiveIngredient"
+                                       class="form-control rounded-3"
+                                       autocomplete="off" />
+
+                                <span asp-validation-for="ActiveIngredient"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+                            <!-- Concentration -->
+                            <div class="col-md-6">
+
+                                <label asp-for="ActiveIngredientConcentration"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <input asp-for="ActiveIngredientConcentration"
+                                       class="form-control rounded-3"
+                                       autocomplete="off" />
+
+                                <span asp-validation-for="ActiveIngredientConcentration"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+                            <!-- Category -->
+                            <div class="col-md-6">
+
+                                <label asp-for="CategoryId"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <select asp-for="CategoryId"
+                                        class="form-select rounded-3"
+                                        asp-items="Model.Categories">
+
+                                    <option value="">
+                                        -- اختر التصنيف --
+                                    </option>
+
+                                </select>
+
+                                <span asp-validation-for="CategoryId"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+                            <!-- Barcode -->
+                            <div class="col-md-6">
+
+                                <label asp-for="Barcode"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text bg-light">
+                                        <i class="bi bi-upc-scan"></i>
+                                    </span>
+
+                                    <input asp-for="Barcode"
+                                           class="form-control"
+                                           autocomplete="off" />
+
+                                </div>
+
+                                <span asp-validation-for="Barcode"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+                            <!-- Units -->
+                            <div class="col-md-6">
+
+                                <label asp-for="UnitsPerBox"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <input asp-for="UnitsPerBox"
+                                       type="number"
+                                       min="1"
+                                       class="form-control rounded-3" />
+
+                                <span asp-validation-for="UnitsPerBox"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+
+
+                            <!-- Current Image -->
+                            @if (!string.IsNullOrWhiteSpace(Model.ImagePath))
+                            {
+                                <div class="col-12">
+
+                                    <div class="bg-light border rounded-4 p-3">
+
+                                        <label class="form-label fw-semibold">
+                                            الصورة الحالية
+                                        </label>
+
+                                        <div class="text-center">
+
+                                            <img src="@Model.ImagePath"
+                                                 alt="@Model.Name"
+                                                 class="img-thumbnail rounded-4"
+                                                 style="max-height: 180px; object-fit: contain;" />
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            }
+
+
+                            <!-- Prescription -->
+                            <div class="col-12">
+
+                                <div class="bg-light border rounded-3 p-3">
+
+                                    <div class="form-check form-switch m-0">
+
+                                        <input asp-for="RequiresPrescription"
+                                               class="form-check-input"
+                                               type="checkbox"
+                                               role="switch" />
+
+                                        <label asp-for="RequiresPrescription"
+                                               class="form-check-label fw-semibold">
+                                            يتطلب وصفة طبية
+                                        </label>
+
+                                    </div>
+
+                                    <small class="text-muted d-block mt-2">
+                                        فعّل هذا الخيار إذا كان صرف الدواء
+                                        يتطلب وصفة طبية.
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- Actions -->
+                            <div class="col-12 mt-2">
+
+                                <div class="d-flex flex-column flex-md-row gap-2">
+
+                                    <button type="submit"
+                                            class="btn btn-warning fw-bold rounded-3 px-4">
+
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        حفظ التعديلات
+
+                                    </button>
+
+
+                                    <a asp-action="Details"
+                                       asp-route-id="@Model.Id"
+                                       class="btn btn-outline-primary rounded-3 px-4">
+
+                                        <i class="bi bi-eye me-1"></i>
+                                        عرض التفاصيل
+
+                                    </a>
+
+
+                                    <a asp-action="Index"
+                                       class="btn btn-outline-secondary rounded-3 px-4">
+
+                                        <i class="bi bi-x-circle me-1"></i>
+                                        إلغاء
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Sidebar -->
+        <div class="col-xl-4 col-lg-9">
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-2 mb-3">
+
+                        <span class="bg-info bg-opacity-10 text-info rounded-3 p-2">
+                            <i class="bi bi-info-circle fs-5"></i>
+                        </span>
+
+                        <h6 class="fw-bold mb-0">
+                            ما الذي يمكن تعديله؟
+                        </h6>
+
+                    </div>
+
+
+                    <ul class="list-unstyled mb-0">
+
+                        <li class="d-flex gap-2 mb-3">
+
+                            <i class="bi bi-check-circle-fill text-success"></i>
+
+                            <span class="small">
+                                اسم الدواء والاسم العلمي
+                            </span>
+
+                        </li>
+
+
+                        <li class="d-flex gap-2 mb-3">
+
+                            <i class="bi bi-check-circle-fill text-success"></i>
+
+                            <span class="small">
+                                المادة الفعالة والتركيز
+                            </span>
+
+                        </li>
+
+
+                        <li class="d-flex gap-2 mb-3">
+
+                            <i class="bi bi-check-circle-fill text-success"></i>
+
+                            <span class="small">
+                                التصنيف والباركود
+                            </span>
+
+                        </li>
+
+
+                        <li class="d-flex gap-2 mb-3">
+
+                            <i class="bi bi-check-circle-fill text-success"></i>
+
+                            <span class="small">
+                                عدد الوحدات داخل العبوة
+                            </span>
+
+                        </li>
+
+
+                        <li class="d-flex gap-2">
+
+                            <i class="bi bi-check-circle-fill text-success"></i>
+
+                            <span class="small">
+                                الصورة وحالة الوصفة الطبية
+                            </span>
+
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+
+            <div class="alert alert-warning border-0 rounded-4 shadow-sm">
+
+                <div class="d-flex gap-3">
+
+                    <i class="bi bi-exclamation-triangle fs-4"></i>
+
+                    <div>
+
+                        <h6 class="fw-bold">
+                            تنبيه
+                        </h6>
+
+                        <p class="small mb-0">
+                            تعديل السعر أو الكمية أو تاريخ الصلاحية
+                            لا يتم من هنا. هذه البيانات مرتبطة بالـ
+                            <strong>Medicine Batch</strong>
+                            ويتم إدارتها من خلال عمليات المخزون والشراء.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

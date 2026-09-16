@@ -1,0 +1,1560 @@
+﻿@model IEnumerable<PharmaSphere.Domain.Entities.Medicine>
+@{
+    ViewData["Title"] = "إدارة الأدوية";
+
+    var medicines = Model?.ToList() ?? new List<PharmaSphere.Domain.Entities.Medicine>();
+
+    var totalMedicines = medicines.Count;
+    var activeMedicines = medicines.Count(x => x.IsActive);
+    var inactiveMedicines = medicines.Count(x => !x.IsActive);
+
+    // حساب إجمالي المخزون مع فلترة التشغيلات الصالحة فقط (الكمية > 0 وتاريخ الصلاحية لم ينتهِ)
+    var totalStock = medicines.Sum(x =>
+        x.Batches?.Where(b => b.RemainingUnits > 0 && b.ExpiryDate.Date >= DateTime.Today)
+                  .Sum(b => b.RemainingUnits) ?? 0);
+
+    var outOfStock = medicines.Count(x =>
+    {
+        var stock = x.Batches?.Where(b => b.RemainingUnits > 0 && b.ExpiryDate.Date >= DateTime.Today)
+                              .Sum(b => b.RemainingUnits) ?? 0;
+        return stock <= 0;
+    });
+
+    var lowStock = medicines.Count(x =>
+    {
+        var stock = x.Batches?.Where(b => b.RemainingUnits > 0 && b.ExpiryDate.Date >= DateTime.Today)
+                              .Sum(b => b.RemainingUnits) ?? 0;
+        return stock > 0 && stock <= 10;
+    });
+
+    var available = medicines.Count(x =>
+    {
+        var stock = x.Batches?.Where(b => b.RemainingUnits > 0 && b.ExpiryDate.Date >= DateTime.Today)
+                              .Sum(b => b.RemainingUnits) ?? 0;
+        return stock > 10;
+    });
+}
+
+<div class="medicine-page" dir="rtl">
+
+    <!-- ================= PAGE HEADER ================= -->
+
+    <div class="page-header">
+
+        <div class="page-heading">
+
+            <div class="page-kicker">
+                <span class="kicker-icon">
+                    <i class="bi bi-capsule-pill"></i>
+                </span>
+
+                إدارة الأدوية
+            </div>
+
+            <h1 class="page-title">
+                دليل الأدوية
+            </h1>
+
+            <p class="page-description">
+                إدارة بيانات الأدوية ومتابعة المخزون والتشغيلات والحالة التشغيلية.
+            </p>
+
+        </div>
+
+        <div class="header-actions">
+
+            <a asp-controller="MedicineBatches"
+               asp-action="Index"
+               class="secondary-btn">
+
+                <i class="bi bi-box-seam"></i>
+
+                <span>التشغيلات والمخزون</span>
+
+            </a>
+
+            <a asp-action="Create"
+               class="primary-btn">
+
+                <i class="bi bi-plus-lg"></i>
+
+                <span>إضافة دواء</span>
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= STATISTICS ================= -->
+
+    <div class="medicine-stats">
+
+        <!-- Total Medicines -->
+
+        <div class="stat-card">
+
+            <div class="stat-icon primary">
+                <i class="bi bi-capsule-pill"></i>
+            </div>
+
+            <div class="stat-content">
+
+                <span class="stat-label">
+                    إجمالي الأدوية
+                </span>
+
+                <strong class="stat-value">
+                    @totalMedicines
+                </strong>
+
+                <small>
+                    صنف مسجل
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <!-- Available -->
+
+        <div class="stat-card">
+
+            <div class="stat-icon success">
+                <i class="bi bi-check2-circle"></i>
+            </div>
+
+            <div class="stat-content">
+
+                <span class="stat-label">
+                    متوفر
+                </span>
+
+                <strong class="stat-value">
+                    @available
+                </strong>
+
+                <small>
+                    مخزون جيد
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <!-- Low Stock -->
+
+        <div class="stat-card">
+
+            <div class="stat-icon warning">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+
+            <div class="stat-content">
+
+                <span class="stat-label">
+                    مخزون منخفض
+                </span>
+
+                <strong class="stat-value">
+                    @lowStock
+                </strong>
+
+                <small>
+                    يحتاج إلى متابعة
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <!-- Out Of Stock -->
+
+        <div class="stat-card">
+
+            <div class="stat-icon danger">
+                <i class="bi bi-box-seam"></i>
+            </div>
+
+            <div class="stat-content">
+
+                <span class="stat-label">
+                    نفد المخزون
+                </span>
+
+                <strong class="stat-value">
+                    @outOfStock
+                </strong>
+
+                <small>
+                    يحتاج إلى توريد
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= INVENTORY SUMMARY ================= -->
+
+    <div class="inventory-summary">
+
+        <div class="summary-item">
+
+            <div class="summary-icon">
+                <i class="bi bi-stack"></i>
+            </div>
+
+            <div>
+                <span>إجمالي الوحدات بالمخزون</span>
+
+                <strong>
+                    @totalStock.ToString("N0")
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div class="summary-divider"></div>
+
+
+        <div class="summary-item">
+
+            <div class="summary-icon">
+                <i class="bi bi-check-circle"></i>
+            </div>
+
+            <div>
+                <span>الأدوية النشطة</span>
+
+                <strong>
+                    @activeMedicines
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div class="summary-divider"></div>
+
+
+        <div class="summary-item">
+
+            <div class="summary-icon">
+                <i class="bi bi-slash-circle"></i>
+            </div>
+
+            <div>
+                <span>الأدوية غير النشطة</span>
+
+                <strong>
+                    @inactiveMedicines
+                </strong>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= MAIN CARD ================= -->
+
+    <div class="medicine-card">
+
+        <!-- Card Header -->
+
+        <div class="medicine-card-header">
+
+            <div>
+
+                <div class="card-title-row">
+
+                    <div class="card-title-icon">
+                        <i class="bi bi-list-ul"></i>
+                    </div>
+
+                    <h2>
+                        قائمة الأدوية
+                    </h2>
+
+                </div>
+
+                <p>
+                    جميع الأدوية المسجلة في كتالوج الصيدلية.
+                </p>
+
+            </div>
+
+
+            <div class="medicine-count">
+
+                <strong>
+                    @totalMedicines
+                </strong>
+
+                <span>
+                    صنف
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= TABLE ================= -->
+
+        <div class="table-wrapper">
+
+            <table class="medicine-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            الدواء
+                        </th>
+
+                        <th>
+                            المادة الفعالة
+                        </th>
+
+                        <th>
+                            Barcode
+                        </th>
+
+                        <th>
+                            التصنيف
+                        </th>
+
+                        <th>
+                            الوحدات / العلبة
+                        </th>
+
+                        <th>
+                            المخزون
+                        </th>
+
+                        <th>
+                            الحالة
+                        </th>
+
+                        <th class="actions-column">
+                            الإجراءات
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @if (medicines.Any())
+                    {
+
+                        @foreach (var item in medicines)
+                        {
+
+                            var stock =
+                                item.Batches?.Sum(b => b.RemainingUnits)
+                                ?? 0;
+
+                            var currentBatch =
+                                item.Batches?
+                                    .Where(b =>
+                                        b.RemainingUnits > 0 &&
+                                        b.ExpiryDate >= DateTime.UtcNow)
+                                    .OrderBy(b => b.ExpiryDate)
+                                    .FirstOrDefault();
+
+                            <tr class="@(!item.IsActive ? "inactive-row" : "")">
+
+                                <!-- ================= MEDICINE ================= -->
+
+                                <td>
+
+                                    <div class="medicine-name-wrapper">
+
+                                        <div class="medicine-avatar">
+                                            <i class="bi bi-capsule"></i>
+                                        </div>
+
+                                        <div class="medicine-info">
+
+                                            <div class="medicine-name">
+                                                @item.Name
+                                            </div>
+
+                                            <div class="scientific-name">
+
+                                                @(string.IsNullOrWhiteSpace(item.ScientificName)
+                                                    ? "الاسم العلمي غير محدد"
+                                                    : item.ScientificName)
+
+                                            </div>
+
+
+                                            @if (item.RequiresPrescription)
+                                            {
+
+                                                <span class="prescription-badge">
+
+                                                    <i class="bi bi-file-medical"></i>
+
+                                                    يتطلب وصفة
+
+                                                </span>
+
+                                            }
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- ================= ACTIVE INGREDIENT ================= -->
+
+                                <td>
+
+                                    <div class="ingredient-cell">
+
+                                        <span class="ingredient-name">
+
+                                            @(string.IsNullOrWhiteSpace(item.ActiveIngredient)
+                                                ? "غير محدد"
+                                                : item.ActiveIngredient)
+
+                                        </span>
+
+                                        @if (!string.IsNullOrWhiteSpace(item.ActiveIngredientConcentration))
+                                        {
+                                            <small>
+                                                @item.ActiveIngredientConcentration
+                                            </small>
+                                        }
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- ================= BARCODE ================= -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(item.Barcode))
+                                    {
+
+                                        <span class="barcode">
+
+                                            <i class="bi bi-upc-scan"></i>
+
+                                            @item.Barcode
+
+                                        </span>
+
+                                    }
+                                    else
+                                    {
+
+                                        <span class="empty-value">
+                                            غير متوفر
+                                        </span>
+
+                                    }
+
+                                </td>
+
+
+                                <!-- ================= CATEGORY ================= -->
+
+                                <td>
+
+                                    <span class="category-badge">
+
+                                        <i class="bi bi-tag"></i>
+
+                                        @(item.Category?.Name ?? "غير محدد")
+
+                                    </span>
+
+                                </td>
+
+
+                                <!-- ================= UNITS ================= -->
+
+                                <td>
+
+                                    <div class="units-cell">
+
+                                        <strong>
+                                            @item.UnitsPerBox
+                                        </strong>
+
+                                        <span>
+                                            وحدة
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- ================= STOCK ================= -->
+
+                                <td>
+
+                                    <div class="stock-wrapper">
+
+                                        <div class="stock-main">
+
+                                            <strong class="stock-number">
+                                                @stock.ToString("N0")
+                                            </strong>
+
+                                            <span>
+                                                وحدة
+                                            </span>
+
+                                        </div>
+
+
+                                        @if (stock <= 0)
+                                        {
+
+                                            <span class="stock-status danger">
+
+                                                <i class="bi bi-x-circle-fill"></i>
+
+                                                نفد المخزون
+
+                                            </span>
+
+                                        }
+                                        else if (stock <= 10)
+                                        {
+
+                                            <span class="stock-status warning">
+
+                                                <i class="bi bi-exclamation-circle-fill"></i>
+
+                                                مخزون منخفض
+
+                                            </span>
+
+                                        }
+                                        else
+                                        {
+
+                                            <span class="stock-status success">
+
+                                                <i class="bi bi-check-circle-fill"></i>
+
+                                                متوفر
+
+                                            </span>
+
+                                        }
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- ================= STATUS ================= -->
+
+                                <td>
+
+                                    @if (!item.IsActive)
+                                    {
+
+                                        <span class="status-badge inactive">
+
+                                            <i class="bi bi-slash-circle"></i>
+
+                                            غير نشط
+
+                                        </span>
+
+                                    }
+                                    else if (stock <= 0)
+                                    {
+
+                                        <span class="status-badge danger">
+
+                                            <i class="bi bi-x-circle"></i>
+
+                                            نفد المخزون
+
+                                        </span>
+
+                                    }
+                                    else if (stock <= 10)
+                                    {
+
+                                        <span class="status-badge warning">
+
+                                            <i class="bi bi-exclamation-circle"></i>
+
+                                            يحتاج توريد
+
+                                        </span>
+
+                                    }
+                                    else
+                                    {
+
+                                        <span class="status-badge success">
+
+                                            <i class="bi bi-check-circle"></i>
+
+                                            متوفر
+
+                                        </span>
+
+                                    }
+
+                                </td>
+
+
+                                <!-- ================= ACTIONS ================= -->
+
+                                <td class="actions-column">
+
+                                    <div class="action-buttons">
+
+                                        <!-- Details -->
+
+                                        <a asp-action="Details"
+                                           asp-route-id="@item.Id"
+                                           class="action-btn details"
+                                           title="عرض التفاصيل"
+                                           aria-label="عرض التفاصيل">
+
+                                            <i class="bi bi-eye"></i>
+
+                                        </a>
+
+
+                                        <!-- Edit -->
+
+                                        <a asp-action="Edit"
+                                           asp-route-id="@item.Id"
+                                           class="action-btn edit"
+                                           title="تعديل الدواء"
+                                           aria-label="تعديل الدواء">
+
+                                            <i class="bi bi-pencil-square"></i>
+
+                                        </a>
+
+
+                                        <!-- Activate / Deactivate -->
+                                        @if (item.IsActive)
+                                        {
+                                            <a asp-action="ConfirmDeactivate"
+                                               asp-route-id="@item.Id"
+                                               class="action-btn deactivate"
+                                               title="تعطيل الدواء"
+                                               aria-label="تعطيل الدواء">
+
+                                                <i class="bi bi-slash-circle"></i>
+
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-action="ConfirmActivate"
+                                               asp-route-id="@item.Id"
+                                               class="action-btn activate"
+                                               title="تفعيل الدواء"
+                                               aria-label="تفعيل الدواء">
+
+                                                <i class="bi bi-check-circle"></i>
+
+                                            </a>
+                                        }
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    }
+                    else
+                    {
+
+                        <!-- ================= EMPTY STATE ================= -->
+
+                        <tr>
+
+                            <td colspan="8">
+
+                                <div class="empty-state">
+
+                                    <div class="empty-icon">
+
+                                        <i class="bi bi-capsule-pill"></i>
+
+                                    </div>
+
+                                    <h3>
+                                        لا توجد أدوية
+                                    </h3>
+
+                                    <p>
+                                        لم يتم تسجيل أي أدوية في كتالوج الصيدلية حتى الآن.
+                                    </p>
+
+                                    <a asp-action="Create"
+                                       class="empty-btn">
+
+                                        <i class="bi bi-plus-lg"></i>
+
+                                        إضافة أول دواء
+
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    /* =========================================================
+           PHARMASPHERE — MEDICINE INDEX
+           ========================================================= */
+
+    .medicine-page {
+        min-height: calc(100vh - 90px);
+        padding: 2rem;
+        background: #f6f8fb;
+    }
+
+
+    /* =========================================================
+           PAGE HEADER
+           ========================================================= */
+
+    .page-header {
+        max-width: 1500px;
+        margin: 0 auto 1.5rem;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1.5rem;
+    }
+
+    .page-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+        color: #2563eb;
+        font-size: .76rem;
+        font-weight: 800;
+        margin-bottom: .45rem;
+    }
+
+    .kicker-icon {
+        width: 28px;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: .55rem;
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .page-title {
+        margin: 0;
+        color: #172033;
+        font-size: 1.9rem;
+        font-weight: 850;
+        letter-spacing: -.03em;
+    }
+
+    .page-description {
+        margin: .45rem 0 0;
+        color: #7b8495;
+        font-size: .88rem;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: .65rem;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+        min-height: 43px;
+        padding: .7rem 1rem;
+        border-radius: .7rem;
+        text-decoration: none;
+        font-size: .8rem;
+        font-weight: 800;
+        transition: all .2s ease;
+        white-space: nowrap;
+    }
+
+    .primary-btn {
+        background: #2563eb;
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, .16);
+    }
+
+        .primary-btn:hover {
+            background: #1d4ed8;
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+    .secondary-btn {
+        background: #fff;
+        color: #344054;
+        border: 1px solid #e4e7ec;
+    }
+
+        .secondary-btn:hover {
+            background: #f8fafc;
+            color: #2563eb;
+            border-color: #bfdbfe;
+        }
+
+
+    /* =========================================================
+           STATISTICS
+           ========================================================= */
+
+    .medicine-stats {
+        max-width: 1500px;
+        margin: 0 auto 1rem;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+    }
+
+    .stat-card {
+        background: #fff;
+        border: 1px solid #edf0f5;
+        border-radius: 1rem;
+        padding: 1.05rem;
+        display: flex;
+        align-items: center;
+        gap: .8rem;
+        box-shadow: 0 5px 18px rgba(30, 41, 59, .035);
+        transition: all .2s ease;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(30, 41, 59, .07);
+        }
+
+    .stat-icon {
+        width: 46px;
+        height: 46px;
+        flex-shrink: 0;
+        border-radius: .8rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+        .stat-icon.primary {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        .stat-icon.success {
+            background: #ecfdf3;
+            color: #16a34a;
+        }
+
+        .stat-icon.warning {
+            background: #fffbeb;
+            color: #d97706;
+        }
+
+        .stat-icon.danger {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+    .stat-content {
+        min-width: 0;
+    }
+
+    .stat-label {
+        display: block;
+        color: #8992a3;
+        font-size: .74rem;
+        font-weight: 600;
+        margin-bottom: .1rem;
+    }
+
+    .stat-value {
+        display: block;
+        color: #172033;
+        font-size: 1.25rem;
+        line-height: 1.2;
+    }
+
+    .stat-content small {
+        color: #a0a7b4;
+        font-size: .67rem;
+    }
+
+
+    /* =========================================================
+           INVENTORY SUMMARY
+           ========================================================= */
+
+    .inventory-summary {
+        max-width: 1500px;
+        margin: 0 auto 1rem;
+        padding: .9rem 1.2rem;
+        background: #fff;
+        border: 1px solid #edf0f5;
+        border-radius: .9rem;
+        display: flex;
+        align-items: center;
+        gap: 1.4rem;
+        box-shadow: 0 4px 16px rgba(30, 41, 59, .025);
+    }
+
+    .summary-item {
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+        flex: 1;
+    }
+
+    .summary-icon {
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: .65rem;
+        background: #f8fafc;
+        color: #64748b;
+    }
+
+    .summary-item span {
+        display: block;
+        color: #8a93a3;
+        font-size: .7rem;
+        margin-bottom: .1rem;
+    }
+
+    .summary-item strong {
+        color: #172033;
+        font-size: .95rem;
+    }
+
+    .summary-divider {
+        width: 1px;
+        height: 32px;
+        background: #edf0f5;
+    }
+
+
+    /* =========================================================
+           MAIN CARD
+           ========================================================= */
+
+    .medicine-card {
+        max-width: 1500px;
+        margin: 0 auto;
+        background: #fff;
+        border: 1px solid #edf0f5;
+        border-radius: 1.1rem;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(30, 41, 59, .045);
+    }
+
+    .medicine-card-header {
+        padding: 1.15rem 1.35rem;
+        border-bottom: 1px solid #edf0f5;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .card-title-row {
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+    }
+
+    .card-title-icon {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: .6rem;
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .medicine-card-header h2 {
+        margin: 0;
+        color: #172033;
+        font-size: .98rem;
+        font-weight: 850;
+    }
+
+    .medicine-card-header p {
+        margin: .3rem 0 0;
+        color: #8a93a3;
+        font-size: .72rem;
+    }
+
+    .medicine-count {
+        display: flex;
+        align-items: baseline;
+        gap: .25rem;
+        padding: .45rem .75rem;
+        background: #eff6ff;
+        color: #2563eb;
+        border-radius: .65rem;
+    }
+
+        .medicine-count strong {
+            font-size: .95rem;
+        }
+
+        .medicine-count span {
+            font-size: .68rem;
+            font-weight: 700;
+        }
+
+
+    /* =========================================================
+           TABLE
+           ========================================================= */
+
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .medicine-table {
+        width: 100%;
+        min-width: 1250px;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        .medicine-table thead th {
+            padding: .9rem .75rem;
+            background: #f8fafc;
+            border-bottom: 1px solid #edf0f5;
+            color: #667085;
+            font-size: .7rem;
+            font-weight: 850;
+            white-space: nowrap;
+        }
+
+        .medicine-table tbody td {
+            padding: .9rem .75rem;
+            border-bottom: 1px solid #f0f2f6;
+            color: #344054;
+            font-size: .78rem;
+            vertical-align: middle;
+        }
+
+        .medicine-table tbody tr {
+            transition: background .15s ease;
+        }
+
+            .medicine-table tbody tr:hover {
+                background: #fbfdff;
+            }
+
+            .medicine-table tbody tr:last-child td {
+                border-bottom: none;
+            }
+
+    .inactive-row {
+        opacity: .7;
+    }
+
+
+    /* =========================================================
+           MEDICINE
+           ========================================================= */
+
+    .medicine-name-wrapper {
+        display: flex;
+        align-items: center;
+        gap: .65rem;
+        min-width: 220px;
+    }
+
+    .medicine-avatar {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: .7rem;
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 1rem;
+    }
+
+    .medicine-info {
+        min-width: 0;
+    }
+
+    .medicine-name {
+        color: #172033;
+        font-size: .82rem;
+        font-weight: 850;
+        margin-bottom: .15rem;
+    }
+
+    .scientific-name {
+        color: #98a1b2;
+        font-size: .68rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 180px;
+    }
+
+    .prescription-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .25rem;
+        margin-top: .3rem;
+        padding: .15rem .4rem;
+        background: #fff7ed;
+        color: #c2410c;
+        border: 1px solid #fed7aa;
+        border-radius: .4rem;
+        font-size: .61rem;
+        font-weight: 800;
+    }
+
+
+    /* =========================================================
+           INGREDIENT
+           ========================================================= */
+
+    .ingredient-cell {
+        min-width: 130px;
+    }
+
+    .ingredient-name {
+        display: block;
+        color: #344054;
+        font-weight: 700;
+        max-width: 170px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .ingredient-cell small {
+        display: block;
+        margin-top: .15rem;
+        color: #98a1b2;
+        font-size: .64rem;
+    }
+
+
+    /* =========================================================
+           BARCODE
+           ========================================================= */
+
+    .barcode {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        padding: .32rem .5rem;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        color: #475467;
+        border-radius: .45rem;
+        font-family: monospace;
+        font-size: .68rem;
+        white-space: nowrap;
+    }
+
+    .empty-value {
+        color: #a0a7b4;
+        font-size: .7rem;
+    }
+
+
+    /* =========================================================
+           CATEGORY
+           ========================================================= */
+
+    .category-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        padding: .32rem .5rem;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        color: #667085;
+        border-radius: .45rem;
+        font-size: .67rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+
+    /* =========================================================
+           UNITS
+           ========================================================= */
+
+    .units-cell {
+        display: flex;
+        align-items: baseline;
+        gap: .25rem;
+        white-space: nowrap;
+    }
+
+        .units-cell strong {
+            color: #172033;
+            font-size: .9rem;
+        }
+
+        .units-cell span {
+            color: #98a1b2;
+            font-size: .65rem;
+        }
+
+
+    /* =========================================================
+           STOCK
+           ========================================================= */
+
+    .stock-wrapper {
+        min-width: 105px;
+    }
+
+    .stock-main {
+        display: flex;
+        align-items: baseline;
+        gap: .25rem;
+    }
+
+    .stock-number {
+        color: #172033;
+        font-size: .9rem;
+    }
+
+    .stock-main span {
+        color: #98a1b2;
+        font-size: .62rem;
+    }
+
+    .stock-status {
+        display: inline-flex;
+        align-items: center;
+        gap: .25rem;
+        margin-top: .2rem;
+        font-size: .62rem;
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+        .stock-status.success {
+            color: #16a34a;
+        }
+
+        .stock-status.warning {
+            color: #d97706;
+        }
+
+        .stock-status.danger {
+            color: #dc2626;
+        }
+
+
+    /* =========================================================
+           STATUS
+           ========================================================= */
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .25rem;
+        padding: .32rem .55rem;
+        border-radius: 999px;
+        font-size: .63rem;
+        font-weight: 850;
+        white-space: nowrap;
+    }
+
+        .status-badge.success {
+            background: #ecfdf3;
+            color: #15803d;
+        }
+
+        .status-badge.warning {
+            background: #fffbeb;
+            color: #b45309;
+        }
+
+        .status-badge.danger {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .status-badge.inactive {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+
+    /* =========================================================
+           ACTIONS
+           ========================================================= */
+
+    .actions-column {
+        width: 135px;
+        text-align: center;
+    }
+
+    .action-buttons {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: .3rem;
+    }
+
+    .action-btn {
+        width: 33px;
+        height: 33px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: .55rem;
+        text-decoration: none;
+        border: 1px solid transparent;
+        transition: all .18s ease;
+    }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .action-btn.details {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+            .action-btn.details:hover {
+                background: #2563eb;
+                color: #fff;
+            }
+
+        .action-btn.edit {
+            background: #fffbeb;
+            color: #d97706;
+        }
+
+            .action-btn.edit:hover {
+                background: #d97706;
+                color: #fff;
+            }
+
+        .action-btn.deactivate {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+            .action-btn.deactivate:hover {
+                background: #dc2626;
+                color: #fff;
+            }
+
+        .action-btn.activate {
+            background: #ecfdf3;
+            color: #16a34a;
+        }
+
+            .action-btn.activate:hover {
+                background: #16a34a;
+                color: #fff;
+            }
+
+
+    /* =========================================================
+           EMPTY STATE
+           ========================================================= */
+
+    .empty-state {
+        padding: 4.5rem 1rem;
+        text-align: center;
+    }
+
+    .empty-icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 1rem;
+        background: #f1f5f9;
+        color: #94a3b8;
+        font-size: 1.8rem;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 .4rem;
+        color: #344054;
+        font-size: 1rem;
+        font-weight: 850;
+    }
+
+    .empty-state p {
+        margin: 0 0 1.2rem;
+        color: #98a1b2;
+        font-size: .78rem;
+    }
+
+    .empty-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        padding: .65rem 1rem;
+        background: #2563eb;
+        color: #fff;
+        border-radius: .65rem;
+        text-decoration: none;
+        font-size: .75rem;
+        font-weight: 800;
+        transition: .2s ease;
+    }
+
+        .empty-btn:hover {
+            background: #1d4ed8;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+
+    /* =========================================================
+           RESPONSIVE
+           ========================================================= */
+
+    @@media (max-width: 1100px) {
+
+        .medicine-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .page-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .header-actions {
+            width: 100%;
+        }
+
+        .primary-btn,
+        .secondary-btn {
+            flex: 1;
+        }
+    }
+
+
+    @@media (max-width: 700px) {
+
+        .medicine-page {
+            padding: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.45rem;
+        }
+
+        .page-description {
+            font-size: .78rem;
+        }
+
+        .medicine-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .inventory-summary {
+            flex-direction: column;
+            align-items: stretch;
+            gap: .8rem;
+        }
+
+        .summary-divider {
+            width: 100%;
+            height: 1px;
+        }
+
+        .medicine-card-header {
+            padding: 1rem;
+        }
+    }
+
+
+    @@media (max-width: 480px) {
+
+        .header-actions {
+            flex-direction: column;
+        }
+
+        .primary-btn,
+        .secondary-btn {
+            width: 100%;
+            flex: none;
+        }
+
+        .stat-card {
+            padding: .9rem;
+        }
+    }
+
+</style>

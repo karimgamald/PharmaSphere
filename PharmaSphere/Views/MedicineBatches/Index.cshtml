@@ -1,0 +1,590 @@
+﻿@model IEnumerable<PharmaSphere.Domain.Entities.MedicineBatch>
+
+@{
+    ViewData["Title"] = "إدارة الدفعات";
+
+    var batches = Model?.ToList()
+        ?? new List<PharmaSphere.Domain.Entities.MedicineBatch>();
+
+    var totalBatches = batches.Count;
+
+    var totalStock = batches.Sum(x => x.RemainingUnits);
+
+    var expiredBatches = batches.Count(x =>
+        x.ExpiryDate <= DateTime.Today);
+
+    var nearExpiryBatches = batches.Count(x =>
+        x.ExpiryDate > DateTime.Today &&
+        x.ExpiryDate <= DateTime.Today.AddMonths(3));
+
+    var validBatches = batches.Count(x =>
+        x.ExpiryDate > DateTime.Today.AddMonths(3));
+}
+
+<div dir="rtl">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <div class="page-icon">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+
+                <div>
+                    <h3 class="fw-bold text-dark mb-0">
+                        إدارة الدفعات
+                    </h3>
+
+                    <p class="text-muted small mb-0 mt-1">
+                        متابعة دفعات الأدوية والكميات والأسعار وتواريخ انتهاء الصلاحية.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <a asp-action="Create"
+           class="btn btn-primary rounded-3 px-4 py-2 shadow-sm fw-bold">
+            <i class="bi bi-plus-lg ms-1"></i>
+            إضافة دفعة جديدة
+        </a>
+
+    </div>
+
+
+    <!-- Statistics -->
+    <div class="row g-3 mb-4">
+
+        <!-- Total Batches -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+
+                <div class="stat-icon bg-primary-subtle text-primary">
+                    <i class="bi bi-boxes"></i>
+                </div>
+
+                <div>
+                    <div class="text-muted small">
+                        إجمالي الدفعات
+                    </div>
+
+                    <h4 class="fw-bold mb-0">
+                        @totalBatches
+                    </h4>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Total Stock -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+
+                <div class="stat-icon bg-success-subtle text-success">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+
+                <div>
+                    <div class="text-muted small">
+                        إجمالي المخزون
+                    </div>
+
+                    <h4 class="fw-bold mb-0">
+                        @totalStock
+                        <small class="text-muted fs-6">وحدة</small>
+                    </h4>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Near Expiry -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+
+                <div class="stat-icon bg-warning-subtle text-warning">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+
+                <div>
+                    <div class="text-muted small">
+                        قريبة الانتهاء
+                    </div>
+
+                    <h4 class="fw-bold mb-0">
+                        @nearExpiryBatches
+                    </h4>
+
+                    <small class="text-muted">
+                        خلال 3 أشهر
+                    </small>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Expired -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card">
+
+                <div class="stat-icon bg-danger-subtle text-danger">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+
+                <div>
+                    <div class="text-muted small">
+                        منتهية الصلاحية
+                    </div>
+
+                    <h4 class="fw-bold mb-0">
+                        @expiredBatches
+                    </h4>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Main Card -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+        <!-- Card Header -->
+        <div class="card-header bg-white border-0 px-4 py-3">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-list-ul ms-2 text-primary"></i>
+                        قائمة الدفعات
+                    </h5>
+
+                    <small class="text-muted">
+                        @totalBatches دفعة مسجلة في النظام
+                    </small>
+                </div>
+
+                <div class="text-muted small">
+                    <i class="bi bi-info-circle ms-1"></i>
+                    يتم تطبيق FEFO عند صرف الأدوية
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Table -->
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th class="px-4">
+                            رقم الدفعة
+                        </th>
+
+                        <th>
+                            الدواء
+                        </th>
+
+                        <th>
+                            تاريخ الانتهاء
+                        </th>
+
+                        <th>
+                            المخزون
+                        </th>
+
+                        <th>
+                            سعر الشراء
+                        </th>
+
+                        <th>
+                            سعر البيع
+                        </th>
+
+                        <th>
+                            الحالة
+                        </th>
+
+                        <th class="text-center px-4">
+                            الإجراءات
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @if (batches.Any())
+                    {
+                        foreach (var batch in batches)
+                        {
+                            var isExpired =
+                                batch.ExpiryDate <= DateTime.Today;
+
+                            var isNearExpiry =
+                                !isExpired &&
+                                batch.ExpiryDate <= DateTime.Today.AddMonths(3);
+
+                            var stockPercentage =
+                                batch.OriginalUnits > 0
+                                    ? (double)batch.RemainingUnits / batch.OriginalUnits * 100
+                                    : 0;
+
+                            <tr>
+
+                                <!-- Batch Number -->
+                                <td class="px-4">
+
+                                    <span class="batch-number">
+                                        #@batch.BatchNumber
+                                    </span>
+
+                                </td>
+
+
+                                <!-- Medicine -->
+                                <td>
+
+                                    <div class="d-flex align-items-center gap-2">
+
+                                        <div class="medicine-icon">
+                                            <i class="bi bi-capsule"></i>
+                                        </div>
+
+                                        <div>
+
+                                            <div class="fw-bold text-dark">
+                                                @(batch.Medicine?.Name ?? "دواء غير محدد")
+                                            </div>
+
+                                            @if (batch.Medicine != null &&
+                                                !string.IsNullOrWhiteSpace(batch.Medicine.ScientificName))
+                                            {
+                                                <small class="text-muted">
+                                                    @batch.Medicine.ScientificName
+                                                </small>
+                                            }
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- Expiry Date -->
+                                <td>
+
+                                    <div class="fw-semibold">
+                                        @batch.ExpiryDate.ToString("yyyy-MM-dd")
+                                    </div>
+
+                                    @if (isExpired)
+                                    {
+                                        <small class="text-danger">
+                                            <i class="bi bi-exclamation-circle ms-1"></i>
+                                            منتهية
+                                        </small>
+                                    }
+                                    else if (isNearExpiry)
+                                    {
+                                        <small class="text-warning">
+                                            <i class="bi bi-clock ms-1"></i>
+                                            تحتاج متابعة
+                                        </small>
+                                    }
+                                    else
+                                    {
+                                        <small class="text-success">
+                                            <i class="bi bi-check-circle ms-1"></i>
+                                            سارية
+                                        </small>
+                                    }
+
+                                </td>
+
+
+                                <!-- Stock -->
+                                <td style="min-width: 150px;">
+
+                                    <div class="d-flex justify-content-between mb-1">
+
+                                        <span class="fw-bold">
+                                            @batch.RemainingUnits
+                                        </span>
+
+                                        <span class="text-muted small">
+                                            من @batch.OriginalUnits
+                                        </span>
+
+                                    </div>
+
+                                    <div class="progress"
+                                         style="height: 6px;">
+
+                                        <div class="progress-bar"
+                                             role="progressbar"
+                                             style="width: @Math.Min(stockPercentage, 100).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%;">
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- Purchase Price -->
+                                <td>
+
+                                    <span class="fw-semibold">
+                                        @batch.PurchasePrice.ToString("C2")
+                                    </span>
+
+                                </td>
+
+
+                                <!-- Selling Price -->
+                                <td>
+
+                                    <span class="fw-bold text-primary">
+                                        @batch.SellingPrice.ToString("C2")
+                                    </span>
+
+                                </td>
+
+
+                                <!-- Status -->
+                                <td>
+
+                                    @if (isExpired)
+                                    {
+                                        <span class="status-badge status-danger">
+                                            <i class="bi bi-x-circle ms-1"></i>
+                                            منتهي الصلاحية
+                                        </span>
+                                    }
+                                    else if (isNearExpiry)
+                                    {
+                                        <span class="status-badge status-warning">
+                                            <i class="bi bi-clock ms-1"></i>
+                                            قريب الانتهاء
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge status-success">
+                                            <i class="bi bi-check-circle ms-1"></i>
+                                            صالح
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- Actions -->
+                                <td class="text-center px-4">
+
+                                    <a asp-action="Edit"
+                                       asp-route-id="@batch.Id"
+                                       class="btn btn-sm btn-outline-primary rounded-2 px-3"
+                                       title="تعديل الدفعة">
+
+                                        <i class="bi bi-pencil-square ms-1"></i>
+                                        تعديل
+
+                                    </a>
+
+                                </td>
+
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+
+                            <td colspan="8"
+                                class="text-center py-5">
+
+                                <div class="empty-state">
+
+                                    <div class="empty-icon">
+                                        <i class="bi bi-box-seam"></i>
+                                    </div>
+
+                                    <h5 class="fw-bold text-dark mt-3">
+                                        لا توجد دفعات
+                                    </h5>
+
+                                    <p class="text-muted mb-3">
+                                        لم يتم تسجيل أي دفعات أدوية حتى الآن.
+                                    </p>
+
+                                    <a asp-action="Create"
+                                       class="btn btn-primary rounded-3 px-4">
+
+                                        <i class="bi bi-plus-lg ms-1"></i>
+                                        إضافة أول دفعة
+
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Styles {
+
+    <style>
+
+        .page-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+            font-size: 1.4rem;
+        }
+
+        .stat-card {
+            background: #fff;
+            border: 1px solid #eef0f3;
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            height: 100%;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s ease;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+            }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .batch-number {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .medicine-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(13, 110, 253, 0.08);
+            color: #0d6efd;
+            flex-shrink: 0;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 50px;
+            padding: 6px 11px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-success {
+            background: #d1e7dd;
+            color: #146c43;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #997404;
+        }
+
+        .status-danger {
+            background: #f8d7da;
+            color: #b02a37;
+        }
+
+        .progress {
+            background-color: #eef1f4;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            border-radius: 10px;
+        }
+
+        .empty-state {
+            padding: 25px;
+        }
+
+        .empty-icon {
+            width: 70px;
+            height: 70px;
+            margin: auto;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            color: #6c757d;
+            font-size: 2rem;
+        }
+
+        .table > :not(caption) > * > * {
+            padding-top: 15px;
+            padding-bottom: 15px;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.15s ease;
+        }
+
+    </style>
+}

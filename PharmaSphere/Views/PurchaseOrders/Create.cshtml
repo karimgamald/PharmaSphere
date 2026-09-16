@@ -1,0 +1,1562 @@
+﻿@model PharmaSphere.Web.ViewModels.CreatePurchaseOrderViewModel
+
+@{
+    ViewData["Title"] = "تسجيل فاتورة توريد جديدة";
+
+    var medicines = ViewBag.Medicines
+        as IEnumerable<PharmaSphere.Domain.Entities.Medicine>
+        ?? Enumerable.Empty<PharmaSphere.Domain.Entities.Medicine>();
+}
+
+<div class="container-fluid py-4" dir="rtl">
+
+    <!-- =========================
+         Page Header
+    ========================== -->
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+
+                <span class="icon-box">
+                    <i class="bi bi-truck"></i>
+                </span>
+
+                <h3 class="fw-bold text-dark mb-0">
+                    تسجيل فاتورة توريد جديدة
+                </h3>
+
+            </div>
+
+            <p class="text-muted mb-0">
+                تسجيل الشحنة الواردة من المورد وإضافة التشغيلات إلى المخزون.
+            </p>
+        </div>
+
+        <a asp-controller="Home"
+           asp-action="Index"
+           class="btn btn-light border rounded-3 px-4">
+
+            <i class="bi bi-arrow-right me-1"></i>
+            العودة للرئيسية
+
+        </a>
+
+    </div>
+
+
+    <!-- =========================
+         Alerts
+    ========================== -->
+
+    <div id="messageContainer"></div>
+
+
+    <!-- =========================
+         Purchase Order Form
+    ========================== -->
+
+    <form id="purchaseOrderForm"
+          autocomplete="off">
+
+        @Html.AntiForgeryToken()
+
+
+        <!-- =========================
+             Invoice Information
+        ========================== -->
+
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+            <div class="card-header bg-white border-0 pt-4 px-4">
+
+                <div class="d-flex align-items-center gap-2">
+
+                    <div class="section-icon">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+
+                    <div>
+
+                        <h5 class="fw-bold mb-1">
+                            بيانات الفاتورة
+                        </h5>
+
+                        <small class="text-muted">
+                            بيانات المورد والفاتورة وتاريخ التوريد
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="card-body p-4">
+
+                <div class="row g-4">
+
+                    <!-- Supplier -->
+
+                    <div class="col-lg-5">
+
+                        <label asp-for="SupplierId"
+                               class="form-label fw-semibold">
+                            المورد
+                        </label>
+
+                        <select asp-for="SupplierId"
+                                asp-items="Model.Suppliers"
+                                class="form-select form-select-lg rounded-3"
+                                id="supplierId"
+                                required>
+
+                            <option value="">
+                                -- اختر المورد --
+                            </option>
+
+                        </select>
+
+                        <span asp-validation-for="SupplierId"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+
+                    <!-- Invoice Number -->
+
+                    <div class="col-lg-4">
+
+                        <label asp-for="InvoiceNumber"
+                               class="form-label fw-semibold">
+                            رقم الفاتورة
+                        </label>
+
+                        <input asp-for="InvoiceNumber"
+                               id="invoiceNumber"
+                               class="form-control form-control-lg rounded-3"
+                               placeholder="مثال: INV-9921"
+                               maxlength="50"
+                               required />
+
+                        <span asp-validation-for="InvoiceNumber"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+
+                    <!-- Purchase Date -->
+
+                    <div class="col-lg-3">
+
+                        <label asp-for="PurchaseDate"
+                               class="form-label fw-semibold">
+                            تاريخ التوريد
+                        </label>
+
+                        <input asp-for="PurchaseDate"
+                               id="purchaseDate"
+                               class="form-control form-control-lg rounded-3"
+                               type="date"
+                               required />
+
+                        <span asp-validation-for="PurchaseDate"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             Purchase Items
+        ========================== -->
+
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+            <div class="card-header bg-white border-0 pt-4 px-4">
+
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                    <div class="d-flex align-items-center gap-2">
+
+                        <div class="section-icon primary">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+
+                        <div>
+
+                            <h5 class="fw-bold mb-1">
+                                عناصر الشحنة
+                            </h5>
+
+                            <small class="text-muted">
+                                أضف كل تشغيلة دواء واردة في الفاتورة
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <button type="button"
+                            id="addItemBtn"
+                            class="btn btn-primary rounded-3 px-4">
+
+                        <i class="bi bi-plus-circle me-1"></i>
+                        إضافة دواء
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="card-body p-4">
+
+                <div class="table-responsive">
+
+                    <table class="table align-middle mb-0"
+                           id="itemsTable">
+
+                        <thead>
+
+                            <tr>
+
+                                <th style="min-width:220px;">
+                                    الدواء
+                                </th>
+
+                                <th style="min-width:150px;">
+                                    رقم التشغيلة
+                                </th>
+
+                                <th style="min-width:155px;">
+                                    تاريخ الانتهاء
+                                </th>
+
+                                <th style="min-width:140px;">
+                                    سعر الشراء
+                                </th>
+
+                                <th style="min-width:140px;">
+                                    سعر البيع
+                                </th>
+
+                                <th style="min-width:130px;">
+                                    الكمية
+                                </th>
+
+                                <th style="min-width:130px;">
+                                    الإجمالي
+                                </th>
+
+                                <th style="width:60px;"></th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="itemsBody"></tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- Empty State -->
+
+                <div id="emptyState"
+                     class="text-center py-5">
+
+                    <div class="empty-icon mb-3">
+
+                        <i class="bi bi-box-seam"></i>
+
+                    </div>
+
+                    <h6 class="fw-bold text-dark">
+                        لا توجد أدوية في الفاتورة
+                    </h6>
+
+                    <p class="text-muted small mb-3">
+                        ابدأ بإضافة أول دواء إلى فاتورة التوريد.
+                    </p>
+
+                    <button type="button"
+                            class="btn btn-outline-primary rounded-3"
+                            id="emptyAddBtn">
+
+                        <i class="bi bi-plus-circle me-1"></i>
+                        إضافة أول دواء
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             Invoice Summary
+        ========================== -->
+
+        <div class="row g-4 mb-4">
+
+            <div class="col-lg-8">
+
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                    <div class="card-body p-4">
+
+                        <h6 class="fw-bold mb-3">
+
+                            <i class="bi bi-info-circle text-primary me-1"></i>
+                            ملاحظات
+
+                        </h6>
+
+                        <div class="alert alert-light border rounded-3 mb-0">
+
+                            <div class="d-flex gap-2">
+
+                                <i class="bi bi-shield-check text-success fs-5"></i>
+
+                                <div class="small">
+
+                                    <strong>
+                                        ملاحظة مهمة:
+                                    </strong>
+
+                                    <div class="text-muted mt-1">
+
+                                        يتم حساب إجمالي الفاتورة والتحقق من الأسعار والكميات
+                                        على السيرفر قبل حفظ البيانات.
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-4">
+
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                    <div class="card-body p-4">
+
+                        <div class="d-flex justify-content-between mb-3">
+
+                            <span class="text-muted">
+                                عدد الأصناف
+                            </span>
+
+                            <strong id="itemsCount">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="d-flex justify-content-between mb-3">
+
+                            <span class="text-muted">
+                                إجمالي الوحدات
+                            </span>
+
+                            <strong id="totalUnits">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <hr>
+
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <span class="fw-bold">
+                                إجمالي الفاتورة
+                            </span>
+
+                            <span class="fw-bold fs-4 text-primary">
+
+                                <span id="grandTotal">
+                                    0.00
+                                </span>
+
+                                <small class="fs-6">
+                                    ج.م
+                                </small>
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             Actions
+        ========================== -->
+
+        <div class="d-flex flex-wrap justify-content-end gap-2 mb-5">
+
+            <a asp-controller="Home"
+               asp-action="Index"
+               class="btn btn-light border rounded-3 px-4 py-2">
+
+                إلغاء
+
+            </a>
+
+
+            <button type="submit"
+                    id="saveBtn"
+                    class="btn btn-success fw-bold rounded-3 px-5 py-2">
+
+                <span id="saveSpinner"
+                      class="spinner-border spinner-border-sm me-2 d-none">
+                </span>
+
+                <i class="bi bi-check-circle me-1"
+                   id="saveIcon">
+                </i>
+
+                حفظ الفاتورة وتغذية المخزون
+
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<style>
+
+    .icon-box {
+        width: 46px;
+        height: 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: rgba(245, 158, 11, .12);
+        color: #d97706;
+        font-size: 21px;
+    }
+
+    .section-icon {
+        width: 42px;
+        height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 11px;
+        background: rgba(245, 158, 11, .12);
+        color: #d97706;
+    }
+
+        .section-icon.primary {
+            background: rgba(37, 99, 235, .10);
+            color: #2563eb;
+        }
+
+    .empty-icon {
+        width: 64px;
+        height: 64px;
+        margin: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #f3f4f6;
+        color: #9ca3af;
+        font-size: 28px;
+    }
+
+    #itemsTable thead th {
+        font-size: .85rem;
+        color: #6b7280;
+        white-space: nowrap;
+        background: #f8fafc;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    #itemsTable tbody td {
+        padding: 14px 8px;
+        vertical-align: middle;
+    }
+
+    .item-total {
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .remove-item {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9px;
+    }
+
+    .form-control,
+    .form-select {
+        border-color: #e5e7eb;
+    }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 .2rem rgba(37, 99, 235, .10);
+        }
+
+    .table > :not(caption) > * > * {
+        border-bottom-color: #f1f5f9;
+    }
+
+    @@media (max-width: 768px) {
+
+        .card-body,
+        .card-header {
+            padding: 1rem !important;
+        }
+
+        #itemsTable {
+            min-width: 1100px;
+        }
+    }
+
+</style>
+
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function() {
+
+        const form =
+            document.getElementById("purchaseOrderForm");
+
+        const itemsBody =
+            document.getElementById("itemsBody");
+
+        const emptyState =
+            document.getElementById("emptyState");
+
+        const addItemBtn =
+            document.getElementById("addItemBtn");
+
+        const emptyAddBtn =
+            document.getElementById("emptyAddBtn");
+
+        const itemsCount =
+            document.getElementById("itemsCount");
+
+        const totalUnits =
+            document.getElementById("totalUnits");
+
+        const grandTotal =
+            document.getElementById("grandTotal");
+
+        const saveBtn =
+            document.getElementById("saveBtn");
+
+        const saveSpinner =
+            document.getElementById("saveSpinner");
+
+        const saveIcon =
+            document.getElementById("saveIcon");
+
+        const messageContainer =
+            document.getElementById("messageContainer");
+
+
+        // =====================================================
+        // Medicines
+        // =====================================================
+
+        const medicines = [
+
+                @foreach (var medicine in medicines)
+            {
+                <text>
+                        {
+                            id: @medicine.Id,
+
+                        name:
+                                    @Html.Raw(
+                                            System.Text.Json.JsonSerializer.Serialize(
+                                                    medicine.Name ?? ""
+            )
+            ),
+
+                        scientificName:
+                                    @Html.Raw(
+                                            System.Text.Json.JsonSerializer.Serialize(
+                                                    medicine.ScientificName ?? ""
+            )
+            )
+                            },
+                </text>
+                }
+
+            ];
+
+
+        let itemIndex = 0;
+
+
+        // =====================================================
+        // Tomorrow date
+        // =====================================================
+
+        function getTomorrowDate() {
+
+            const date = new Date();
+
+            date.setDate(
+                date.getDate() + 1
+            );
+
+            return date
+                .toISOString()
+                .split("T")[0];
+        }
+
+
+        // =====================================================
+        // Escape HTML
+        // =====================================================
+
+        function escapeHtml(value) {
+
+            if (
+                value === null ||
+                value === undefined
+            ) {
+                return "";
+            }
+
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+
+        // =====================================================
+        // Medicine options
+        // =====================================================
+
+        function getMedicineOptions() {
+
+            let options =
+                `<option value="">-- اختر الدواء --</option>`;
+
+            medicines.forEach(function(medicine) {
+
+                options += `
+                        <option value="${medicine.id}">
+                            ${escapeHtml(medicine.name)}
+                            ${medicine.scientificName
+                        ? ` - ${escapeHtml(medicine.scientificName)}`
+                        : ""
+                    }
+                        </option>
+                    `;
+
+            });
+
+            return options;
+        }
+
+
+        // =====================================================
+        // Add item
+        // =====================================================
+
+        function addItem() {
+
+            const index =
+                itemIndex++;
+
+            const row =
+                document.createElement("tr");
+
+            row.dataset.index =
+                index;
+
+            row.innerHTML = `
+
+                    <td>
+
+                        <select
+                            name="Items[${index}].MedicineId"
+                            class="form-select rounded-3 medicine-select"
+                            required>
+
+                            ${getMedicineOptions()}
+
+                        </select>
+
+                    </td>
+
+
+                    <td>
+
+                        <input
+                            type="text"
+                            name="Items[${index}].BatchNumber"
+                            class="form-control rounded-3"
+                            placeholder="Batch-001"
+                            maxlength="50"
+                            required />
+
+                    </td>
+
+
+                    <td>
+
+                        <input
+                            type="date"
+                            name="Items[${index}].ExpiryDate"
+                            class="form-control rounded-3 expiry-input"
+                            min="${getTomorrowDate()}"
+                            required />
+
+                    </td>
+
+
+                    <td>
+
+                        <input
+                            type="number"
+                            name="Items[${index}].PurchasePrice"
+                            class="form-control rounded-3 purchase-price"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            required />
+
+                    </td>
+
+
+                    <td>
+
+                        <input
+                            type="number"
+                            name="Items[${index}].SellingPrice"
+                            class="form-control rounded-3 selling-price"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            required />
+
+                    </td>
+
+
+                    <td>
+
+                        <input
+                            type="number"
+                            name="Items[${index}].QuantityUnits"
+                            class="form-control rounded-3 quantity"
+                            min="1"
+                            step="1"
+                            value="1"
+                            required />
+
+                    </td>
+
+
+                    <td>
+
+                        <span class="item-total">
+                            0.00 ج.م
+                        </span>
+
+                    </td>
+
+
+                    <td class="text-center">
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-danger remove-item"
+                            title="حذف">
+
+                            <i class="bi bi-trash"></i>
+
+                        </button>
+
+                    </td>
+
+                `;
+
+            itemsBody.appendChild(row);
+
+            updateUI();
+        }
+
+
+        // =====================================================
+        // Row total
+        // =====================================================
+
+        function updateRowTotal(row) {
+
+            const purchasePrice =
+                parseFloat(
+                    row.querySelector(
+                        ".purchase-price"
+                    ).value
+                ) || 0;
+
+            const quantity =
+                parseInt(
+                    row.querySelector(
+                        ".quantity"
+                    ).value
+                ) || 0;
+
+            const total =
+                purchasePrice * quantity;
+
+            row.querySelector(
+                ".item-total"
+            ).textContent =
+                `${total.toFixed(2)} ج.م`;
+        }
+
+
+        // =====================================================
+        // Summary
+        // =====================================================
+
+        function updateSummary() {
+
+            const rows =
+                itemsBody.querySelectorAll("tr");
+
+            let total = 0;
+            let units = 0;
+
+            rows.forEach(function(row) {
+
+                const purchasePrice =
+                    parseFloat(
+                        row.querySelector(
+                            ".purchase-price"
+                        ).value
+                    ) || 0;
+
+                const quantity =
+                    parseInt(
+                        row.querySelector(
+                            ".quantity"
+                        ).value
+                    ) || 0;
+
+                total +=
+                    purchasePrice * quantity;
+
+                units +=
+                    quantity;
+
+                updateRowTotal(row);
+
+            });
+
+            itemsCount.textContent =
+                rows.length;
+
+            totalUnits.textContent =
+                units;
+
+            grandTotal.textContent =
+                total.toFixed(2);
+        }
+
+
+        // =====================================================
+        // UI
+        // =====================================================
+
+        function updateUI() {
+
+            const hasItems =
+                itemsBody.querySelectorAll("tr").length > 0;
+
+            emptyState.classList.toggle(
+                "d-none",
+                hasItems
+            );
+
+            updateSummary();
+        }
+
+
+        // =====================================================
+        // Remove item
+        // =====================================================
+
+        itemsBody.addEventListener(
+            "click",
+            function(event) {
+
+                const button =
+                    event.target.closest(
+                        ".remove-item"
+                    );
+
+                if (!button)
+                    return;
+
+                const row =
+                    button.closest("tr");
+
+                if (!row)
+                    return;
+
+                row.remove();
+
+                updateUI();
+            }
+        );
+
+
+        // =====================================================
+        // Input changes
+        // =====================================================
+
+        itemsBody.addEventListener(
+            "input",
+            function(event) {
+
+                if (
+                    event.target.classList.contains(
+                        "purchase-price"
+                    ) ||
+                    event.target.classList.contains(
+                        "quantity"
+                    )
+                ) {
+
+                    updateSummary();
+
+                }
+
+            }
+        );
+
+
+        // =====================================================
+        // Buttons
+        // =====================================================
+
+        addItemBtn.addEventListener(
+            "click",
+            addItem
+        );
+
+        emptyAddBtn.addEventListener(
+            "click",
+            addItem
+        );
+
+
+        // =====================================================
+        // Message
+        // =====================================================
+
+        function showMessage(
+            message,
+            type = "danger"
+        ) {
+
+            messageContainer.innerHTML = `
+
+                    <div
+                        class="alert alert-${type}
+                               border-0 shadow-sm rounded-3
+                               d-flex align-items-center gap-2"
+                        role="alert">
+
+                        <i class="bi ${type === "success"
+                    ? "bi-check-circle"
+                    : "bi-exclamation-triangle"
+                }"></i>
+
+                        <span>
+                            ${escapeHtml(message)}
+                        </span>
+
+                    </div>
+
+                `;
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        }
+
+
+        // =====================================================
+        // Validate items
+        // =====================================================
+
+        function validateItems() {
+
+            const rows =
+                itemsBody.querySelectorAll("tr");
+
+            if (rows.length === 0) {
+
+                showMessage(
+                    "يرجى إضافة دواء واحد على الأقل إلى الفاتورة."
+                );
+
+                return false;
+            }
+
+
+            for (const row of rows) {
+
+                const medicineId =
+                    parseInt(
+                        row.querySelector(
+                            ".medicine-select"
+                        ).value
+                    );
+
+                const batchNumber =
+                    row.querySelector(
+                        'input[name*=".BatchNumber"]'
+                    ).value.trim();
+
+                const purchasePrice =
+                    parseFloat(
+                        row.querySelector(
+                            ".purchase-price"
+                        ).value
+                    );
+
+                const sellingPrice =
+                    parseFloat(
+                        row.querySelector(
+                            ".selling-price"
+                        ).value
+                    );
+
+                const quantity =
+                    parseInt(
+                        row.querySelector(
+                            ".quantity"
+                        ).value
+                    );
+
+                const expiryDate =
+                    row.querySelector(
+                        ".expiry-input"
+                    ).value;
+
+
+                if (
+                    Number.isNaN(medicineId) ||
+                    medicineId <= 0
+                ) {
+
+                    showMessage(
+                        "يرجى اختيار الدواء لكل بند."
+                    );
+
+                    return false;
+                }
+
+
+                if (!batchNumber) {
+
+                    showMessage(
+                        "يرجى إدخال رقم التشغيلة لكل دواء."
+                    );
+
+                    return false;
+                }
+
+
+                if (
+                    Number.isNaN(purchasePrice) ||
+                    purchasePrice < 0
+                ) {
+
+                    showMessage(
+                        "يرجى إدخال سعر شراء صحيح."
+                    );
+
+                    return false;
+                }
+
+
+                if (
+                    Number.isNaN(sellingPrice) ||
+                    sellingPrice < 0
+                ) {
+
+                    showMessage(
+                        "يرجى إدخال سعر بيع صحيح."
+                    );
+
+                    return false;
+                }
+
+
+                if (
+                    sellingPrice < purchasePrice
+                ) {
+
+                    showMessage(
+                        "سعر البيع لا يمكن أن يكون أقل من سعر الشراء."
+                    );
+
+                    return false;
+                }
+
+
+                if (
+                    Number.isNaN(quantity) ||
+                    quantity <= 0
+                ) {
+
+                    showMessage(
+                        "كمية الدواء يجب أن تكون أكبر من صفر."
+                    );
+
+                    return false;
+                }
+
+
+                if (!expiryDate) {
+
+                    showMessage(
+                        "يرجى إدخال تاريخ انتهاء جميع التشغيلات."
+                    );
+
+                    return false;
+                }
+
+            }
+
+            return true;
+        }
+
+
+        // =====================================================
+        // Submit
+        // =====================================================
+
+        form.addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+                messageContainer.innerHTML = "";
+
+
+                // -------------------------------------------------
+                // Supplier
+                // -------------------------------------------------
+
+                const supplierId =
+                    parseInt(
+                        document.getElementById(
+                            "supplierId"
+                        ).value
+                    );
+
+                if (
+                    Number.isNaN(supplierId) ||
+                    supplierId <= 0
+                ) {
+
+                    showMessage(
+                        "يرجى اختيار المورد."
+                    );
+
+                    return;
+                }
+
+
+                // -------------------------------------------------
+                // Invoice number
+                // -------------------------------------------------
+
+                const invoiceNumber =
+                    document
+                        .getElementById(
+                            "invoiceNumber"
+                        )
+                        .value
+                        .trim();
+
+                if (!invoiceNumber) {
+
+                    showMessage(
+                        "يرجى إدخال رقم الفاتورة."
+                    );
+
+                    return;
+                }
+
+
+                // -------------------------------------------------
+                // Purchase date
+                // -------------------------------------------------
+
+                const purchaseDate =
+                    document
+                        .getElementById(
+                            "purchaseDate"
+                        )
+                        .value;
+
+                if (!purchaseDate) {
+
+                    showMessage(
+                        "يرجى اختيار تاريخ التوريد."
+                    );
+
+                    return;
+                }
+
+
+                // -------------------------------------------------
+                // Items
+                // -------------------------------------------------
+
+                if (!validateItems())
+                    return;
+
+
+                // -------------------------------------------------
+                // Build items
+                // -------------------------------------------------
+
+                const rows =
+                    itemsBody.querySelectorAll("tr");
+
+                const items = [];
+
+
+                rows.forEach(function(row) {
+
+                    items.push({
+
+                        medicineId:
+                            parseInt(
+                                row.querySelector(
+                                    ".medicine-select"
+                                ).value
+                            ),
+
+                        batchNumber:
+                            row.querySelector(
+                                'input[name*=".BatchNumber"]'
+                            ).value.trim(),
+
+                        expiryDate:
+                            row.querySelector(
+                                ".expiry-input"
+                            ).value,
+
+                        purchasePrice:
+                            parseFloat(
+                                row.querySelector(
+                                    ".purchase-price"
+                                ).value
+                            ),
+
+                        sellingPrice:
+                            parseFloat(
+                                row.querySelector(
+                                    ".selling-price"
+                                ).value
+                            ),
+
+                        quantityUnits:
+                            parseInt(
+                                row.querySelector(
+                                    ".quantity"
+                                ).value
+                            )
+
+                    });
+
+                });
+
+
+                // -------------------------------------------------
+                // Payload
+                // -------------------------------------------------
+
+                const payload = {
+
+                    supplierId:
+                        supplierId,
+
+                    invoiceNumber:
+                        invoiceNumber,
+
+                    purchaseDate:
+                        purchaseDate,
+
+                    items:
+                        items
+
+                };
+
+
+                console.log(
+                    "Sending Purchase Order:",
+                    payload
+                );
+
+
+                // -------------------------------------------------
+                // Disable button
+                // -------------------------------------------------
+
+                saveBtn.disabled = true;
+
+                saveSpinner.classList.remove(
+                    "d-none"
+                );
+
+                saveIcon.classList.add(
+                    "d-none"
+                );
+
+
+                try {
+
+                    // -------------------------------------------------
+                    // Anti Forgery Token
+                    // -------------------------------------------------
+
+                    const tokenInput =
+                        document.querySelector(
+                            'input[name="__RequestVerificationToken"]'
+                        );
+
+                    if (!tokenInput) {
+
+                        showMessage(
+                            "لم يتم العثور على رمز الحماية الخاص بالنموذج."
+                        );
+
+                        return;
+                    }
+
+
+                    const token =
+                        tokenInput.value;
+
+
+                    // -------------------------------------------------
+                    // Send request
+                    // -------------------------------------------------
+
+                    const response =
+                        await fetch(
+                            '@Url.Action("Create", "PurchaseOrders")',
+                            {
+
+                                method: "POST",
+
+                                headers: {
+
+                                    "Content-Type":
+                                        "application/json",
+
+                                    "RequestVerificationToken":
+                                        token
+
+                                },
+
+                                body:
+                                    JSON.stringify(
+                                        payload
+                                    )
+
+                            }
+                        );
+
+
+                    // -------------------------------------------------
+                    // Read response as text first
+                    // -------------------------------------------------
+
+                    const responseText =
+                        await response.text();
+
+
+                    console.log(
+                        "HTTP Status:",
+                        response.status
+                    );
+
+                    console.log(
+                        "Server Response:",
+                        responseText
+                    );
+
+
+                    // -------------------------------------------------
+                    // Parse JSON
+                    // -------------------------------------------------
+
+                    let result;
+
+                    try {
+
+                        result =
+                            JSON.parse(
+                                responseText
+                            );
+
+                    }
+                    catch (jsonError) {
+
+                        console.error(
+                            "JSON Parse Error:",
+                            jsonError
+                        );
+
+                        showMessage(
+                            `حدث خطأ من الخادم. كود الاستجابة: ${response.status}`
+                        );
+
+                        return;
+                    }
+
+
+                    // -------------------------------------------------
+                    // Server validation/error
+                    // -------------------------------------------------
+
+                    if (
+                        !response.ok ||
+                        !result.success
+                    ) {
+
+                        showMessage(
+                            result.message ||
+                            "حدث خطأ أثناء حفظ الفاتورة."
+                        );
+
+                        return;
+                    }
+
+
+                    // -------------------------------------------------
+                    // Success
+                    // -------------------------------------------------
+
+                    showMessage(
+
+                        `تم تسجيل الفاتورة ${result.invoiceNumber} بنجاح. إجمالي الفاتورة: ${Number(result.totalAmount).toFixed(2)} ج.م`,
+
+                        "success"
+
+                    );
+
+
+                    // -------------------------------------------------
+                    // Redirect
+                    // -------------------------------------------------
+
+                    setTimeout(
+                        function() {
+
+                            window.location.href =
+                                '@Url.Action("Index", "PurchaseOrders")';
+
+                        },
+                        1500
+                    );
+
+                }
+                catch (error) {
+
+                    console.error(
+                        "Fetch Error:",
+                        error
+                    );
+
+                    showMessage(
+                        "حدث خطأ أثناء إرسال الطلب إلى الخادم."
+                    );
+
+                }
+                finally {
+
+                    saveBtn.disabled = false;
+
+                    saveSpinner.classList.add(
+                        "d-none"
+                    );
+
+                    saveIcon.classList.remove(
+                        "d-none"
+                    );
+
+                }
+
+            }
+        );
+
+
+        // =====================================================
+        // Initial row
+        // =====================================================
+
+        addItem();
+
+    });
+
+</script>

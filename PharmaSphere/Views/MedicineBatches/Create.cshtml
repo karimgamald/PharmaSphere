@@ -1,0 +1,687 @@
+﻿@model PharmaSphere.Web.ViewModels.BatchFormViewModel
+
+@{
+    ViewData["Title"] = "إضافة دفعة جديدة";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div class="d-flex align-items-center gap-3">
+
+            <div class="page-icon">
+                <i class="bi bi-box-seam"></i>
+            </div>
+
+            <div>
+                <h3 class="fw-bold text-dark mb-1">
+                    إضافة دفعة دواء جديدة
+                </h3>
+
+                <p class="text-muted mb-0">
+                    تسجيل بيانات الدفعة والكمية والأسعار وتاريخ انتهاء الصلاحية
+                </p>
+            </div>
+
+        </div>
+
+        <a asp-action="Index"
+           class="btn btn-outline-secondary rounded-3 px-4">
+
+            <i class="bi bi-arrow-right me-1"></i>
+            العودة للدفعات
+
+        </a>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <!-- ========================= -->
+        <!-- Main Form -->
+        <!-- ========================= -->
+
+        <div class="col-xl-8">
+
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+                <div class="card-header bg-white border-0 px-4 pt-4 pb-3">
+
+                    <div class="d-flex align-items-center gap-2">
+
+                        <span class="section-icon">
+                            <i class="bi bi-pencil-square"></i>
+                        </span>
+
+                        <div>
+                            <h5 class="fw-bold mb-1">
+                                بيانات الدفعة
+                            </h5>
+
+                            <small class="text-muted">
+                                أدخل جميع بيانات الدفعة بدقة
+                            </small>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-body px-4 pb-4">
+
+                    <form asp-action="Create"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="alert alert-danger rounded-3"
+                             role="alert">
+                        </div>
+
+
+                        <!-- ========================= -->
+                        <!-- Medicine -->
+                        <!-- ========================= -->
+
+                        <div class="mb-4">
+
+                            <label asp-for="MedicineId"
+                                   class="form-label fw-semibold">
+                            </label>
+
+                            <div class="input-group">
+
+                                <span class="input-group-text bg-light">
+                                    <i class="bi bi-capsule text-primary"></i>
+                                </span>
+
+                                <select asp-for="MedicineId" asp-items="Model.Medicines" class="form-select">
+                                    <option value="">-- اختر الدواء --</option>
+                                </select>
+                            </div>
+
+                            <span asp-validation-for="MedicineId"
+                                  class="text-danger small">
+                            </span>
+
+                            <div class="form-text">
+                                اختر الدواء الذي تنتمي إليه هذه الدفعة.
+                            </div>
+
+                        </div>
+
+
+                        <!-- ========================= -->
+                        <!-- Batch Information -->
+                        <!-- ========================= -->
+
+                        <div class="section-title mb-3">
+
+                            <div class="d-flex align-items-center gap-2">
+
+                                <span class="section-icon">
+                                    <i class="bi bi-upc-scan"></i>
+                                </span>
+
+                                <div>
+                                    <h6 class="fw-bold mb-0">
+                                        بيانات الدفعة
+                                    </h6>
+
+                                    <small class="text-muted">
+                                        رقم الدفعة وتاريخ انتهاء الصلاحية
+                                    </small>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="row g-3 mb-4">
+
+                            <!-- Batch Number -->
+
+                            <div class="col-md-6">
+
+                                <label asp-for="BatchNumber"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text bg-light">
+                                        <i class="bi bi-upc text-primary"></i>
+                                    </span>
+
+                                    <input asp-for="BatchNumber"
+                                           class="form-control"
+                                           placeholder="مثال: BATCH-102" />
+
+                                </div>
+
+                                <span asp-validation-for="BatchNumber"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+                            <!-- Expiry Date -->
+
+                            <div class="col-md-6">
+
+                                <label asp-for="ExpiryDate"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text bg-light">
+                                        <i class="bi bi-calendar-x text-danger"></i>
+                                    </span>
+
+                                    <input asp-for="ExpiryDate"
+                                           type="date"
+                                           class="form-control" />
+
+                                </div>
+
+                                <span asp-validation-for="ExpiryDate"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ========================= -->
+                        <!-- Stock & Pricing -->
+                        <!-- ========================= -->
+
+                        <div class="section-title mb-3">
+
+                            <div class="d-flex align-items-center gap-2">
+
+                                <span class="section-icon">
+                                    <i class="bi bi-boxes"></i>
+                                </span>
+
+                                <div>
+                                    <h6 class="fw-bold mb-0">
+                                        المخزون والأسعار
+                                    </h6>
+
+                                    <small class="text-muted">
+                                        تحديد كمية الدفعة وتكلفة الشراء وسعر البيع
+                                    </small>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="row g-3 mb-4">
+
+                            <!-- Quantity -->
+
+                            <div class="col-md-4">
+
+                                <label asp-for="Quantity"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text bg-light">
+                                        <i class="bi bi-stack text-primary"></i>
+                                    </span>
+
+                                    <input asp-for="Quantity"
+                                           type="number"
+                                           min="1"
+                                           class="form-control"
+                                           placeholder="الكمية" />
+
+                                </div>
+
+                                <span asp-validation-for="Quantity"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+                            <!-- Purchase Price -->
+
+                            <div class="col-md-4">
+
+                                <label asp-for="PurchasePrice"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text bg-light">
+                                        <i class="bi bi-cart-check text-warning"></i>
+                                    </span>
+
+                                    <input asp-for="PurchasePrice"
+                                           type="number"
+                                           min="0"
+                                           step="0.01"
+                                           class="form-control"
+                                           placeholder="سعر الشراء" />
+
+                                    <span class="input-group-text bg-light">
+                                        ج.م
+                                    </span>
+
+                                </div>
+
+                                <span asp-validation-for="PurchasePrice"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+                            <!-- Selling Price -->
+
+                            <div class="col-md-4">
+
+                                <label asp-for="SellingPrice"
+                                       class="form-label fw-semibold">
+                                </label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text bg-light">
+                                        <i class="bi bi-cash-coin text-success"></i>
+                                    </span>
+
+                                    <input asp-for="SellingPrice"
+                                           type="number"
+                                           min="0"
+                                           step="0.01"
+                                           class="form-control"
+                                           placeholder="سعر البيع" />
+
+                                    <span class="input-group-text bg-light">
+                                        ج.م
+                                    </span>
+
+                                </div>
+
+                                <span asp-validation-for="SellingPrice"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ========================= -->
+                        <!-- Actions -->
+                        <!-- ========================= -->
+
+                        <div class="border-top pt-4">
+
+                            <div class="d-flex flex-wrap justify-content-end gap-2">
+
+                                <a asp-action="Index"
+                                   class="btn btn-light border rounded-3 px-4">
+
+                                    <i class="bi bi-x-lg me-1"></i>
+                                    إلغاء
+
+                                </a>
+
+                                <button type="submit"
+                                        class="btn btn-primary rounded-3 px-4 fw-bold">
+
+                                    <i class="bi bi-check-lg me-1"></i>
+                                    حفظ الدفعة
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- Sidebar -->
+        <!-- ========================= -->
+
+        <div class="col-xl-4">
+
+            <!-- Workflow -->
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-2 mb-4">
+
+                        <span class="section-icon">
+                            <i class="bi bi-diagram-3"></i>
+                        </span>
+
+                        <div>
+
+                            <h6 class="fw-bold mb-1">
+                                دورة الدفعة
+                            </h6>
+
+                            <small class="text-muted">
+                                طريقة التعامل مع الدفعة داخل النظام
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="workflow-step">
+
+                        <div class="step-number">
+                            1
+                        </div>
+
+                        <div>
+
+                            <h6 class="fw-semibold mb-1">
+                                اختيار الدواء
+                            </h6>
+
+                            <p class="text-muted small mb-0">
+                                حدد الدواء المرتبط بهذه الدفعة.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="workflow-line"></div>
+
+
+                    <div class="workflow-step">
+
+                        <div class="step-number">
+                            2
+                        </div>
+
+                        <div>
+
+                            <h6 class="fw-semibold mb-1">
+                                بيانات الدفعة
+                            </h6>
+
+                            <p class="text-muted small mb-0">
+                                أدخل رقم الدفعة وتاريخ انتهاء الصلاحية.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="workflow-line"></div>
+
+
+                    <div class="workflow-step">
+
+                        <div class="step-number">
+                            3
+                        </div>
+
+                        <div>
+
+                            <h6 class="fw-semibold mb-1">
+                                تحديد الكمية والأسعار
+                            </h6>
+
+                            <p class="text-muted small mb-0">
+                                سجل كمية الدفعة وتكلفة الشراء وسعر البيع.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="workflow-line"></div>
+
+
+                    <div class="workflow-step">
+
+                        <div class="step-number">
+                            4
+                        </div>
+
+                        <div>
+
+                            <h6 class="fw-semibold mb-1">
+                                حركة المخزون
+                            </h6>
+
+                            <p class="text-muted small mb-0">
+                                يتم تتبع الكمية من خلال حركات المخزون والبيع.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Important Information -->
+
+            <div class="card border-0 bg-light rounded-4">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-start gap-3">
+
+                        <div class="text-warning fs-4">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+
+                        <div>
+
+                            <h6 class="fw-bold mb-3">
+                                معلومات مهمة
+                            </h6>
+
+                            <ul class="text-muted small mb-0 ps-3">
+
+                                <li class="mb-2">
+                                    تأكد من صحة تاريخ انتهاء الصلاحية.
+                                </li>
+
+                                <li class="mb-2">
+                                    يجب أن تكون الكمية أكبر من صفر.
+                                </li>
+
+                                <li class="mb-2">
+                                    سعر الشراء يمثل تكلفة هذه الدفعة.
+                                </li>
+
+                                <li class="mb-2">
+                                    سعر البيع هو السعر المستخدم عند البيع.
+                                </li>
+
+                                <li>
+                                    يفضل استخدام رقم Batch واضح ومميز.
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    .page-icon {
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        background: rgba(13, 110, 253, 0.10);
+        color: #0d6efd;
+        font-size: 24px;
+    }
+
+
+    .section-title {
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eef0f3;
+    }
+
+
+    .section-icon {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border-radius: 10px;
+        background: rgba(13, 110, 253, 0.08);
+        color: #0d6efd;
+    }
+
+
+    .form-control,
+    .form-select,
+    .input-group-text {
+        min-height: 46px;
+    }
+
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.10);
+        }
+
+
+    .input-group .form-control,
+    .input-group .form-select {
+        border-radius: 0 10px 10px 0;
+    }
+
+
+    .input-group .input-group-text:first-child {
+        border-radius: 10px 0 0 10px;
+    }
+
+
+    .input-group .input-group-text:last-child {
+        border-radius: 10px 0 0 10px;
+    }
+
+
+    .workflow-step {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+
+    .step-number {
+        width: 32px;
+        height: 32px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(13, 110, 253, 0.10);
+        color: #0d6efd;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+
+    .workflow-line {
+        width: 2px;
+        height: 22px;
+        background: #e9ecef;
+        margin-right: 15px;
+        margin-top: 4px;
+        margin-bottom: 4px;
+    }
+
+
+    .card {
+        transition: box-shadow 0.2s ease;
+    }
+
+
+        .card:hover {
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.07) !important;
+        }
+
+
+    @@media (max-width: 767.98px) {
+
+        .container-fluid {
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+
+        .card-body,
+        .card-header {
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+        }
+
+        .page-icon {
+            width: 46px;
+            height: 46px;
+            font-size: 20px;
+        }
+    }
+
+</style>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

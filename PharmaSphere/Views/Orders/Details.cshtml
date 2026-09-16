@@ -1,0 +1,539 @@
+﻿@using PharmaSphere.Domain.Enums
+@model PharmaSphere.Domain.Entities.Order
+
+@{
+    ViewData["Title"] = "تفاصيل الطلب #" + Model.OrderNumber;
+
+    var orderItems = Model.OrderItems?.ToList() ?? new List<PharmaSphere.Domain.Entities.OrderItem>();
+
+    var statusClass = Model.OrderStatus switch
+    {
+        OrderStatus.Pending => "bg-warning-subtle text-warning-emphasis border-warning-subtle",
+        OrderStatus.Preparing => "bg-info-subtle text-info-emphasis border-info-subtle",
+        OrderStatus.OutForDelivery => "bg-primary-subtle text-primary border-primary-subtle",
+        OrderStatus.Completed => "bg-success-subtle text-success border-success-subtle",
+        OrderStatus.Cancelled => "bg-danger-subtle text-danger border-danger-subtle",
+        _ => "bg-secondary-subtle text-secondary border-secondary-subtle"
+    };
+
+    var paymentClass = Model.PaymentStatus switch
+    {
+        PaymentStatus.Paid => "bg-success-subtle text-success border-success-subtle",
+        PaymentStatus.Unpaid => "bg-warning-subtle text-warning-emphasis border-warning-subtle",
+        _ => "bg-secondary-subtle text-secondary border-secondary-subtle"
+    };
+}
+
+<div class="container-fluid py-4" dir="rtl">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <div class="bg-primary-subtle text-primary rounded-3 p-2">
+                    <i class="bi bi-receipt fs-5"></i>
+                </div>
+
+                <div>
+                    <h3 class="fw-bold text-dark mb-0">
+                        تفاصيل الطلب
+                    </h3>
+
+                    <div class="text-muted small mt-1">
+                        رقم الطلب:
+                        <span class="fw-bold text-primary">
+                            #@Model.OrderNumber
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-muted small mt-2">
+                <i class="bi bi-calendar3 me-1"></i>
+                @Model.OrderDate.ToLocalTime().ToString("dd/MM/yyyy")
+                <span class="mx-1">•</span>
+                @Model.OrderDate.ToLocalTime().ToString("hh:mm tt")
+            </div>
+        </div>
+
+        <a asp-action="Index"
+           class="btn btn-outline-secondary rounded-3 px-4">
+            <i class="bi bi-arrow-right me-1"></i>
+            العودة للطلبات
+        </a>
+    </div>
+
+
+    <div class="row g-4">
+
+        <!-- ========================= -->
+        <!-- Order Items -->
+        <!-- ========================= -->
+        <div class="col-xl-8">
+
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+
+                <div class="card-header bg-white border-0 p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <h5 class="fw-bold text-dark mb-1">
+                                <i class="bi bi-cart3 text-primary me-2"></i>
+                                أصناف الطلب
+                            </h5>
+
+                            <span class="text-muted small">
+                                @orderItems.Count صنف
+                            </span>
+                        </div>
+
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2">
+                            @Model.OrderStatus
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-responsive">
+
+                    <table class="table align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+                                <th class="px-4 py-3">الدواء</th>
+                                <th class="py-3">الكمية</th>
+                                <th class="py-3">سعر الوحدة</th>
+                                <th class="py-3 text-end px-4">الإجمالي</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @if (orderItems.Any())
+                            {
+                                foreach (var item in orderItems)
+                                {
+                                    <tr>
+
+                                        <td class="px-4">
+
+                                            <div class="d-flex align-items-center gap-3">
+
+                                                <div class="bg-light rounded-3 p-2 text-primary">
+                                                    <i class="bi bi-capsule"></i>
+                                                </div>
+
+                                                <div>
+                                                    <div class="fw-bold text-dark">
+                                                        @(item.Medicine?.Name ?? "دواء غير معروف")
+                                                    </div>
+
+                                                    @if (item.Medicine?.ScientificName != null)
+                                                    {
+                                                        <div class="text-muted small">
+                                                            @item.Medicine.ScientificName
+                                                        </div>
+                                                    }
+
+                                                    @if (item.MedicineBatch != null)
+                                                    {
+                                                        <div class="text-muted small mt-1">
+                                                            Batch:
+                                                            <span class="fw-semibold">
+                                                                @item.MedicineBatch.BatchNumber
+                                                            </span>
+                                                        </div>
+                                                    }
+                                                </div>
+
+                                            </div>
+
+                                        </td>
+
+
+                                        <td>
+                                            <span class="badge bg-light text-dark border rounded-3 px-3 py-2">
+                                                @item.Quantity
+                                            </span>
+                                        </td>
+
+
+                                        <td class="fw-semibold">
+                                            @item.UnitPrice.ToString("C2")
+                                        </td>
+
+
+                                        <td class="text-end px-4">
+
+                                            <span class="fw-bold text-success">
+                                                @item.TotalPrice.ToString("C2")
+                                            </span>
+
+                                        </td>
+
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4"
+                                        class="text-center py-5 text-muted">
+
+                                        <i class="bi bi-cart-x fs-1 d-block mb-3"></i>
+
+                                        لا توجد عناصر مسجلة لهذا الطلب.
+
+                                    </td>
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- ========================= -->
+            <!-- Prescription -->
+            <!-- ========================= -->
+            @if (Model.Prescription != null)
+            {
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+                    <div class="card-body p-4">
+
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                <div class="bg-primary-subtle text-primary rounded-3 p-3">
+                                    <i class="bi bi-file-earmark-medical fs-4"></i>
+                                </div>
+
+                                <div>
+
+                                    <h6 class="fw-bold text-dark mb-1">
+                                        الروشتة الطبية
+                                    </h6>
+
+                                    <div class="text-muted small">
+                                        الروشتة المرتبطة بهذا الطلب
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle rounded-pill px-3 py-2">
+                                    @Model.Prescription.Status
+                                </span>
+
+                                <a asp-controller="Prescriptions"
+                                   asp-action="Details"
+                                   asp-route-id="@Model.Prescription.Id"
+                                   class="btn btn-outline-primary btn-sm rounded-3 px-3">
+
+                                    <i class="bi bi-eye me-1"></i>
+                                    عرض الروشتة
+
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- Sidebar -->
+        <!-- ========================= -->
+
+        <div class="col-xl-4">
+
+
+            <!-- Order Status -->
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+                <div class="card-body p-4">
+
+                    <h6 class="fw-bold text-dark mb-3">
+                        <i class="bi bi-info-circle text-primary me-2"></i>
+                        حالة الطلب
+                    </h6>
+
+                    <hr class="mt-0" />
+
+
+                    <div class="mb-3">
+
+                        <span class="text-muted small d-block mb-1">
+                            نوع الطلب
+                        </span>
+
+                        <span class="fw-bold text-dark">
+                            @Model.OrderType
+                        </span>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <span class="text-muted small d-block mb-1">
+                            حالة الطلب
+                        </span>
+
+                        <span class="badge @statusClass border rounded-pill px-3 py-2">
+                            @Model.OrderStatus
+                        </span>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <span class="text-muted small d-block mb-1">
+                            طريقة الدفع
+                        </span>
+
+                        <div class="fw-semibold text-dark">
+                            @Model.PaymentMethod
+                        </div>
+
+                    </div>
+
+
+                    <div>
+
+                        <span class="text-muted small d-block mb-1">
+                            حالة الدفع
+                        </span>
+
+                        <span class="badge @paymentClass border rounded-pill px-3 py-2">
+                            @Model.PaymentStatus
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Customer & Delivery -->
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+                <div class="card-body p-4">
+
+                    <h6 class="fw-bold text-dark mb-3">
+                        <i class="bi bi-people text-primary me-2"></i>
+                        الأطراف المشاركة
+                    </h6>
+
+                    <hr class="mt-0" />
+
+
+                    <!-- Customer -->
+
+                    <div class="d-flex align-items-start gap-3 mb-4">
+
+                        <div class="bg-primary-subtle text-primary rounded-3 p-2">
+                            <i class="bi bi-person"></i>
+                        </div>
+
+                        <div>
+
+                            <span class="text-muted small d-block">
+                                العميل
+                            </span>
+
+                            <strong class="text-dark">
+                                @(Model.Client?.UserName ?? "عميل مباشر (POS)")
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Pharmacist -->
+
+                    <div class="d-flex align-items-start gap-3 mb-4">
+
+                        <div class="bg-success-subtle text-success rounded-3 p-2">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+
+                        <div>
+
+                            <span class="text-muted small d-block">
+                                الصيدلي المسؤول
+                            </span>
+
+                            <strong class="text-dark">
+                                @(Model.Pharmacist?.UserName ?? "غير محدد")
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Delivery -->
+
+                    <div class="d-flex align-items-start gap-3">
+
+                        <div class="bg-warning-subtle text-warning-emphasis rounded-3 p-2">
+                            <i class="bi bi-truck"></i>
+                        </div>
+
+                        <div>
+
+                            <span class="text-muted small d-block">
+                                مندوب التوصيل
+                            </span>
+
+                            <strong class="text-dark">
+                                @(Model.DeliveryBoy?.UserName ?? "غير محدد")
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Shipping -->
+            @if (!string.IsNullOrWhiteSpace(Model.ShippingAddress))
+            {
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+                    <div class="card-body p-4">
+
+                        <h6 class="fw-bold text-dark mb-3">
+                            <i class="bi bi-geo-alt text-primary me-2"></i>
+                            عنوان التوصيل
+                        </h6>
+
+                        <div class="bg-light rounded-3 p-3">
+
+                            <div class="text-dark">
+                                @Model.ShippingAddress
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+
+            <!-- Financial Summary -->
+
+            <div class="card border-0 shadow-sm rounded-4">
+
+                <div class="card-body p-4">
+
+                    <h6 class="fw-bold text-dark mb-3">
+                        <i class="bi bi-calculator text-primary me-2"></i>
+                        الملخص المالي
+                    </h6>
+
+                    <hr class="mt-0" />
+
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span class="text-muted">
+                            إجمالي المنتجات
+                        </span>
+
+                        <span class="fw-semibold">
+                            @Model.SubTotal.ToString("C2")
+                        </span>
+
+                    </div>
+
+
+                    @if (Model.DiscountAmount > 0)
+                    {
+                        <div class="d-flex justify-content-between mb-3">
+
+                            <span class="text-muted">
+                                الخصم
+                            </span>
+
+                            <span class="fw-semibold text-danger">
+                                -@Model.DiscountAmount.ToString("C2")
+                            </span>
+
+                        </div>
+                    }
+
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span class="text-muted">
+                            رسوم التوصيل
+                        </span>
+
+                        <span class="fw-semibold">
+                            @Model.DeliveryFee.ToString("C2")
+                        </span>
+
+                    </div>
+
+
+                    <hr />
+
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <span class="fw-bold text-dark">
+                            الإجمالي النهائي
+                        </span>
+
+                        <span class="fw-bold text-success fs-4">
+                            @Model.TotalAmount.ToString("C2")
+                        </span>
+
+                    </div>
+
+
+                    <div class="text-muted small mt-2 text-center">
+                        الإجمالي النهائي شامل رسوم التوصيل والخصم
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

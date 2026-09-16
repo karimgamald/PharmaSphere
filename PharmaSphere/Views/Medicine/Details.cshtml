@@ -1,0 +1,561 @@
+﻿@model PharmaSphere.Domain.Entities.Medicine
+
+@{
+    ViewData["Title"] = $"تفاصيل الدواء - {Model.Name}";
+
+    var batches = Model.Batches?
+        .OrderBy(b => b.ExpiryDate)
+        .ToList() ?? new List<PharmaSphere.Domain.Entities.MedicineBatch>();
+
+    var now = DateTime.UtcNow;
+
+    var totalStock = batches
+        .Where(b => b.ExpiryDate > now)
+        .Sum(b => b.RemainingUnits);
+
+    var availableBatches = batches
+        .Count(b => b.ExpiryDate > now && b.RemainingUnits > 0);
+
+    var nearestBatch = batches
+        .Where(b => b.ExpiryDate > now && b.RemainingUnits > 0)
+        .OrderBy(b => b.ExpiryDate)
+        .FirstOrDefault();
+
+    var sellingPrice = nearestBatch?.SellingPrice;
+}
+
+<div class="container-fluid py-4" dir="rtl">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+
+                <span class="bg-primary bg-opacity-10 text-primary rounded-3 p-2">
+                    <i class="bi bi-capsule-pill fs-4"></i>
+                </span>
+
+                <div>
+                    <h3 class="fw-bold text-dark mb-0">
+                        @Model.Name
+                    </h3>
+
+                    <p class="text-muted small mb-0">
+                        الاسم العلمي:
+                        <span class="fw-semibold text-dark">
+                            @(string.IsNullOrWhiteSpace(Model.ScientificName)
+                                ? "غير مسجل"
+                                : Model.ScientificName)
+                        </span>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a asp-action="Edit"
+               asp-route-id="@Model.Id"
+               class="btn btn-warning fw-semibold px-4 rounded-3">
+
+                <i class="bi bi-pencil me-1"></i>
+                تعديل
+            </a>
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary px-4 rounded-3">
+
+                <i class="bi bi-arrow-right me-1"></i>
+                العودة للقائمة
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-4">
+
+        <!-- Stock -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-start">
+
+                        <div>
+                            <span class="text-muted small">
+                                المخزون المتاح
+                            </span>
+
+                            <h3 class="fw-bold text-primary mt-2 mb-1">
+                                @totalStock
+                            </h3>
+
+                            <small class="text-muted">
+                                وحدة
+                            </small>
+                        </div>
+
+                        <span class="bg-primary bg-opacity-10 text-primary rounded-3 p-2">
+                            <i class="bi bi-box-seam fs-5"></i>
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Selling Price -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-start">
+
+                        <div>
+
+                            <span class="text-muted small">
+                                سعر البيع الحالي
+                            </span>
+
+                            @if (sellingPrice.HasValue)
+                            {
+                                <h3 class="fw-bold text-success mt-2 mb-1">
+                                    @sellingPrice.Value.ToString("N2")
+                                </h3>
+
+                                <small class="text-muted">
+                                    حسب أقرب Batch صالح
+                                </small>
+                            }
+                            else
+                            {
+                                <h5 class="fw-bold text-muted mt-3 mb-1">
+                                    غير متوفر
+                                </h5>
+
+                                <small class="text-muted">
+                                    لا توجد Batch صالحة للبيع
+                                </small>
+                            }
+
+                        </div>
+
+                        <span class="bg-success bg-opacity-10 text-success rounded-3 p-2">
+                            <i class="bi bi-cash-stack fs-5"></i>
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Units Per Box -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-start">
+
+                        <div>
+
+                            <span class="text-muted small">
+                                وحدات العبوة
+                            </span>
+
+                            <h3 class="fw-bold text-dark mt-2 mb-1">
+                                @Model.UnitsPerBox
+                            </h3>
+
+                            <small class="text-muted">
+                                وحدة / عبوة
+                            </small>
+
+                        </div>
+
+                        <span class="bg-info bg-opacity-10 text-info rounded-3 p-2">
+                            <i class="bi bi-box fs-5"></i>
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Category -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-start">
+
+                        <div>
+
+                            <span class="text-muted small">
+                                التصنيف
+                            </span>
+
+                            <h5 class="fw-bold text-dark mt-2 mb-2">
+                                @(Model.Category?.Name ?? "غير محدد")
+                            </h5>
+
+                            @if (Model.RequiresPrescription)
+                            {
+                                <span class="badge bg-danger-subtle text-danger">
+                                    <i class="bi bi-file-medical me-1"></i>
+                                    يتطلب روشتة
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success-subtle text-success">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    صرف مباشر OTC
+                                </span>
+                            }
+
+                        </div>
+
+                        <span class="bg-secondary bg-opacity-10 text-secondary rounded-3 p-2">
+                            <i class="bi bi-tags fs-5"></i>
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <!-- Batches -->
+        <div class="col-xl-8">
+
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+                <div class="card-header bg-white border-0 p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <h6 class="fw-bold mb-1">
+                                <i class="bi bi-box-seam text-primary me-2"></i>
+                                التشغيلات والمخزون
+                            </h6>
+
+                            <small class="text-muted">
+                                @availableBatches Batch متاحة للبيع
+                            </small>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-body p-0">
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle mb-0">
+
+                            <thead class="table-light">
+
+                                <tr>
+
+                                    <th class="px-4">
+                                        رقم التشغيلة
+                                    </th>
+
+                                    <th>
+                                        تاريخ الصلاحية
+                                    </th>
+
+                                    <th>
+                                        المتبقي
+                                    </th>
+
+                                    <th>
+                                        سعر البيع
+                                    </th>
+
+                                    <th class="text-end px-4">
+                                        الحالة
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                @if (batches.Any())
+                                {
+                                    foreach (var batch in batches)
+                                    {
+                                        var isExpired = batch.ExpiryDate <= now;
+
+                                        var isNearExpiry =
+                                            batch.ExpiryDate <= now.AddMonths(3)
+                                            && !isExpired;
+
+                                        var isOutOfStock =
+                                            batch.RemainingUnits <= 0;
+
+
+                                        <tr>
+
+                                            <td class="px-4">
+                                                <code class="fw-bold">
+                                                    @batch.BatchNumber
+                                                </code>
+                                            </td>
+
+
+                                            <td>
+                                                @batch.ExpiryDate.ToString("yyyy-MM-dd")
+                                            </td>
+
+
+                                            <td>
+
+                                                <span class="fw-bold">
+                                                    @batch.RemainingUnits
+                                                </span>
+
+                                                <small class="text-muted">
+                                                    / @batch.OriginalUnits
+                                                </small>
+
+                                            </td>
+
+
+                                            <td class="fw-semibold">
+                                                @batch.SellingPrice.ToString("N2")
+                                            </td>
+
+
+                                            <td class="text-end px-4">
+
+                                                @if (isExpired)
+                                                {
+                                                    <span class="badge bg-danger-subtle text-danger">
+                                                        منتهي الصلاحية
+                                                    </span>
+                                                }
+                                                else if (isOutOfStock)
+                                                {
+                                                    <span class="badge bg-secondary-subtle text-secondary">
+                                                        نفد المخزون
+                                                    </span>
+                                                }
+                                                else if (isNearExpiry)
+                                                {
+                                                    <span class="badge bg-warning-subtle text-warning">
+                                                        قريب الانتهاء
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-success-subtle text-success">
+                                                        صالح
+                                                    </span>
+                                                }
+
+                                            </td>
+
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+
+                                        <td colspan="5"
+                                            class="text-center py-5">
+
+                                            <div class="text-muted">
+
+                                                <i class="bi bi-box-seam fs-1 d-block mb-3"></i>
+
+                                                <h6 class="fw-bold">
+                                                    لا توجد تشغيلات
+                                                </h6>
+
+                                                <p class="small mb-0">
+                                                    لم يتم تسجيل أي Batch لهذا الدواء حتى الآن.
+                                                </p>
+
+                                            </div>
+
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Medicine Information -->
+        <div class="col-xl-4">
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+
+                <div class="card-body p-4">
+
+                    <h6 class="fw-bold mb-4">
+                        <i class="bi bi-info-circle text-info me-2"></i>
+                        معلومات الدواء
+                    </h6>
+
+
+                    <div class="mb-3">
+
+                        <span class="text-muted small d-block mb-1">
+                            المادة الفعالة
+                        </span>
+
+                        <span class="fw-semibold">
+                            @(string.IsNullOrWhiteSpace(Model.ActiveIngredient)
+                                ? "غير مسجل"
+                                : Model.ActiveIngredient)
+                        </span>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <span class="text-muted small d-block mb-1">
+                            التركيز
+                        </span>
+
+                        <span class="fw-semibold">
+                            @(string.IsNullOrWhiteSpace(Model.ActiveIngredientConcentration)
+                                ? "غير مسجل"
+                                : Model.ActiveIngredientConcentration)
+                        </span>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <span class="text-muted small d-block mb-1">
+                            الباركود
+                        </span>
+
+                        @if (string.IsNullOrWhiteSpace(Model.Barcode))
+                        {
+                            <span class="text-muted">
+                                غير مسجل
+                            </span>
+                        }
+                        else
+                        {
+                            <code class="fw-semibold">
+                                @Model.Barcode
+                            </code>
+                        }
+
+                    </div>
+
+
+                    <div>
+
+                        <span class="text-muted small d-block mb-1">
+                            حالة الدواء
+                        </span>
+
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success-subtle text-success">
+                                <i class="bi bi-check-circle me-1"></i>
+                                نشط
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary-subtle text-secondary">
+                                غير نشط
+                            </span>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Image -->
+            @if (!string.IsNullOrWhiteSpace(Model.ImagePath))
+            {
+                <div class="card border-0 shadow-sm rounded-4">
+
+                    <div class="card-body p-4">
+
+                        <h6 class="fw-bold mb-3">
+                            <i class="bi bi-image text-primary me-2"></i>
+                            صورة الدواء
+                        </h6>
+
+                        <div class="text-center">
+
+                            <img src="@Model.ImagePath"
+                                 alt="@Model.Name"
+                                 class="img-fluid rounded-4 border"
+                                 style="max-height: 260px; object-fit: contain;" />
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

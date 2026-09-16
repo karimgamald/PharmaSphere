@@ -1,0 +1,246 @@
+﻿@model PharmaSphere.Domain.Entities.SalesReturn
+
+@{
+    ViewData["Title"] = "تفاصيل المرتجع";
+}
+
+<div class="container py-4" dir="rtl">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <a asp-action="Index"
+               class="text-decoration-none">
+
+                <i class="bi bi-arrow-right"></i>
+                العودة إلى المرتجعات
+
+            </a>
+
+            <h2 class="fw-bold mt-3 mb-1">
+                تفاصيل المرتجع #@Model.Id
+            </h2>
+
+            <p class="text-muted mb-0">
+                تفاصيل عملية إرجاع المنتج
+            </p>
+
+        </div>
+
+        <button onclick="window.print()"
+                class="btn btn-outline-primary">
+
+            <i class="bi bi-printer"></i>
+            طباعة
+
+        </button>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <div class="col-lg-8">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header bg-white">
+
+                    <h5 class="fw-bold mb-0">
+                        بيانات المرتجع
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row g-4">
+
+                        <div class="col-md-6">
+
+                            <label class="text-muted">
+                                رقم الطلب
+                            </label>
+
+                            <div class="fw-bold">
+                                @(Model.Order?.OrderNumber ?? "غير معروف")
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <label class="text-muted">
+                                تاريخ المرتجع
+                            </label>
+
+                            <div class="fw-bold">
+
+                                @Model.ReturnedAt
+                                .ToLocalTime()
+                                .ToString("dd/MM/yyyy HH:mm")
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <label class="text-muted">
+                                الدواء
+                            </label>
+
+                            <div class="fw-bold">
+
+                                @(Model.MedicineBatch?.Medicine?.Name
+                                    ?? "غير معروف")
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <label class="text-muted">
+                                رقم التشغيلة
+                            </label>
+
+                            <div>
+
+                                <code>
+                                    @(Model.MedicineBatch?.BatchNumber ?? "-")
+                                </code>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <label class="text-muted">
+                                الكمية المرتجعة
+                            </label>
+
+                            <div class="fw-bold">
+
+                                @Model.ReturnedUnits وحدة
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-6">
+
+                            <label class="text-muted">
+                                المبلغ المسترد
+                            </label>
+
+                            <div class="fw-bold text-danger fs-5">
+
+                                @Model.RefundAmount.ToString("N2")
+                                ج.م
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-12">
+
+                            <label class="text-muted">
+                                سبب المرتجع
+                            </label>
+
+                            <div class="mt-2 p-3 bg-light rounded">
+
+                                @(string.IsNullOrWhiteSpace(Model.Reason)
+                                    ? "لم يتم تحديد سبب."
+                                    : Model.Reason)
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-4">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body text-center py-5">
+
+                    <div class="return-icon mb-3">
+
+                        <i class="bi bi-arrow-counterclockwise"></i>
+
+                    </div>
+
+                    <h5 class="fw-bold">
+                        تمت عملية الإرجاع
+                    </h5>
+
+                    <p class="text-muted">
+                        تم تسجيل الكمية المرتجعة ضمن حركة المخزون.
+                    </p>
+
+                    <div class="alert alert-success">
+
+                        <i class="bi bi-box-seam"></i>
+
+                        تمت إضافة
+                        <strong>
+                            @Model.ReturnedUnits
+                        </strong>
+                        وحدة إلى المخزون.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    .return-icon {
+        width: 80px;
+        height: 80px;
+        margin: auto;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e8f1ff;
+        color: #2563eb;
+        font-size: 35px;
+    }
+
+    @@media print {
+
+        .btn,
+        nav,
+        footer {
+            display: none !important;
+        }
+    }
+
+</style>

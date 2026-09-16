@@ -1,0 +1,1075 @@
+﻿@model PharmaSphere.Web.ViewModels.ShopViewModel
+
+@{
+    ViewData["Title"] = "الصيدلية";
+
+    var medicines = Model.Medicines
+        ?? Enumerable.Empty<PharmaSphere.Domain.Entities.Medicine>();
+
+    var categories = Model.Categories
+        ?? Enumerable.Empty<PharmaSphere.Domain.Entities.Category>();
+
+    var today = DateTime.UtcNow.Date;
+}
+
+<style>
+
+    /* =========================================================
+       PAGE
+       ========================================================= */
+
+    .shop-page {
+        direction: rtl;
+        padding: 25px 0 60px;
+    }
+
+
+    /* =========================================================
+       HEADER
+       ========================================================= */
+
+    .shop-header {
+        background: linear-gradient(135deg, #0d6efd, #0a58ca);
+        border-radius: 20px;
+        padding: 30px;
+        color: #fff;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 30px rgba(13, 110, 253, 0.15);
+    }
+
+    .shop-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .shop-header h2 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin: 0 0 8px;
+    }
+
+    .shop-header p {
+        margin: 0;
+        font-size: 0.95rem;
+        opacity: 0.9;
+    }
+
+    .shop-header-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 15px;
+        background: rgba(255, 255, 255, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.7rem;
+        margin-left: 15px;
+    }
+
+    .shop-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .shop-header .btn {
+        border-radius: 10px;
+        padding: 11px 18px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+
+    /* =========================================================
+       ALERTS
+       ========================================================= */
+
+    .shop-alert {
+        border: none;
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-bottom: 20px;
+    }
+
+
+    /* =========================================================
+       FILTER CARD
+       ========================================================= */
+
+    .filter-card {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 18px;
+        padding: 22px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.04);
+    }
+
+    .filter-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #212529;
+        margin-bottom: 18px;
+    }
+
+    .filter-title i {
+        color: #0d6efd;
+    }
+
+    .filter-label {
+        display: block;
+        font-weight: 700;
+        color: #343a40;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+
+    .search-wrapper {
+        position: relative;
+    }
+
+    .search-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    .search-input {
+        width: 100%;
+        min-height: 48px;
+        border: 1px solid #dee2e6;
+        border-radius: 11px;
+        padding: 8px 45px 8px 15px;
+        font-size: 0.92rem;
+        transition: 0.2s;
+    }
+
+    .search-input:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
+        outline: none;
+    }
+
+    .category-select {
+        width: 100%;
+        min-height: 48px;
+        border: 1px solid #dee2e6;
+        border-radius: 11px;
+        padding: 8px 14px;
+        font-size: 0.92rem;
+        cursor: pointer;
+    }
+
+    .category-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
+        outline: none;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 8px;
+        height: 48px;
+    }
+
+    .filter-actions .btn {
+        border-radius: 11px;
+        font-weight: 700;
+    }
+
+    .btn-search {
+        flex: 1;
+    }
+
+    .btn-reset {
+        width: 48px;
+    }
+
+
+    /* =========================================================
+       SELECTED FILTER
+       ========================================================= */
+
+    .selected-filter {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 18px;
+        padding-top: 15px;
+        border-top: 1px solid #f1f3f5;
+        color: #6c757d;
+        font-size: 0.88rem;
+    }
+
+    .selected-filter strong {
+        color: #212529;
+    }
+
+    .selected-filter i {
+        color: #0d6efd;
+    }
+
+
+    /* =========================================================
+       RESULTS HEADER
+       ========================================================= */
+
+    .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .results-title-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .results-title-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 11px;
+        background: #e7f1ff;
+        color: #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .results-title {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #212529;
+        margin: 0;
+    }
+
+    .results-count {
+        background: #f1f3f5;
+        color: #495057;
+        padding: 7px 15px;
+        border-radius: 20px;
+        font-size: 0.88rem;
+        font-weight: 700;
+    }
+
+
+    /* =========================================================
+       MEDICINE CARD
+       ========================================================= */
+
+    .medicine-card {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 17px;
+        overflow: hidden;
+        height: 100%;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.045);
+    }
+
+    .medicine-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.10);
+        border-color: #cfe2ff;
+    }
+
+    .medicine-unavailable {
+        opacity: 0.72;
+    }
+
+
+    /* =========================================================
+       CARD BADGES
+       ========================================================= */
+
+    .medicine-badges {
+        padding: 17px 17px 0;
+        min-height: 42px;
+    }
+
+    .medicine-badges-left {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .medicine-badges .badge {
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+
+    /* =========================================================
+       CARD CONTENT
+       ========================================================= */
+
+    .medicine-content {
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        min-height: 250px;
+    }
+
+    .medicine-name {
+        color: #212529;
+        font-size: 1.15rem;
+        font-weight: 800;
+        line-height: 1.5;
+        margin: 0 0 7px;
+    }
+
+    .medicine-scientific-name {
+        color: #6c757d;
+        font-size: 0.91rem;
+        font-style: italic;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .medicine-active-ingredient {
+        color: #868e96;
+        font-size: 0.82rem;
+        line-height: 1.5;
+        margin: 10px 0 0;
+    }
+
+    .medicine-active-ingredient strong {
+        color: #495057;
+    }
+
+    .medicine-spacer {
+        flex: 1;
+        min-height: 30px;
+    }
+
+
+    /* =========================================================
+       PRICE
+       ========================================================= */
+
+    .medicine-price {
+        display: flex;
+        align-items: baseline;
+        gap: 5px;
+        color: #198754;
+        font-size: 1.3rem;
+        font-weight: 800;
+        margin-bottom: 15px;
+    }
+
+    .medicine-price-unit {
+        color: #6c757d;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .price-unavailable {
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+
+    /* =========================================================
+       ACTIONS
+       ========================================================= */
+
+    .medicine-actions {
+        display: flex;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .medicine-actions .btn {
+        min-height: 42px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.88rem;
+    }
+
+    .btn-details {
+        min-width: 105px;
+        white-space: nowrap;
+    }
+
+    .add-to-cart-form {
+        flex: 1;
+        display: flex;
+    }
+
+    .btn-add {
+        width: 100%;
+        white-space: nowrap;
+    }
+
+
+    /* =========================================================
+       EMPTY STATE
+       ========================================================= */
+
+    .empty-state {
+        background: #fff;
+        border: 1px dashed #ced4da;
+        border-radius: 18px;
+        padding: 65px 25px;
+        text-align: center;
+        color: #6c757d;
+    }
+
+    .empty-state-icon {
+        width: 78px;
+        height: 78px;
+        border-radius: 50%;
+        background: #f1f3f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 2rem;
+        color: #6c757d;
+    }
+
+    .empty-state h4 {
+        color: #343a40;
+        font-size: 1.2rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .empty-state p {
+        margin-bottom: 20px;
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+    @@media (max-width: 991.98px) {
+
+        .shop-header-content {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .shop-header-actions {
+            width: 100%;
+        }
+
+        .shop-header-actions .btn {
+            width: 100%;
+        }
+
+    }
+
+    @@media (max-width: 767.98px) {
+
+        .shop-page {
+            padding-top: 15px;
+        }
+
+        .shop-header {
+            padding: 22px;
+            border-radius: 16px;
+        }
+
+        .shop-header h2 {
+            font-size: 1.45rem;
+        }
+
+        .filter-card {
+            padding: 17px;
+        }
+
+        .results-header {
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .results-title {
+            font-size: 1.1rem;
+        }
+
+        .medicine-content {
+            min-height: 235px;
+        }
+
+    }
+
+</style>
+
+
+<div class="container-fluid shop-page">
+
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <div class="shop-header">
+
+        <div class="shop-header-content">
+
+            <div class="d-flex align-items-center">
+
+                <div class="shop-header-icon">
+                    <i class="bi bi-shop"></i>
+                </div>
+
+                <div>
+
+                    <h2>
+                        صيدلية PharmaSphere
+                    </h2>
+
+                    <p>
+                        تصفح الأدوية وابحث عن المنتج المناسب وأضفه إلى سلة المشتريات.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="shop-header-actions">
+
+                <a asp-controller="Shop"
+                   asp-action="Cart"
+                   class="btn btn-light">
+
+                    <i class="bi bi-cart3 me-1"></i>
+
+                    سلة المشتريات
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ALERTS
+         ===================================================== -->
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success shop-alert">
+
+            <i class="bi bi-check-circle-fill me-2"></i>
+
+            @TempData["SuccessMessage"]
+
+        </div>
+    }
+
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger shop-alert">
+
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+
+            @TempData["ErrorMessage"]
+
+        </div>
+    }
+
+
+    <!-- =====================================================
+         SEARCH & CATEGORY FILTER
+         ===================================================== -->
+
+    <div class="filter-card">
+
+        <div class="filter-title">
+
+            <i class="bi bi-funnel-fill"></i>
+
+            البحث والتصفية
+
+        </div>
+
+
+        <form asp-controller="Shop"
+              asp-action="Index"
+              method="get">
+
+            <div class="row g-3">
+
+
+                <!-- SEARCH -->
+
+                <div class="col-lg-6">
+
+                    <label class="filter-label">
+                        البحث عن دواء
+                    </label>
+
+                    <div class="search-wrapper">
+
+                        <i class="bi bi-search search-icon"></i>
+
+                        <input type="text"
+                               name="search"
+                               value="@Model.Search"
+                               class="search-input"
+                               placeholder="اسم الدواء أو الاسم العلمي أو المادة الفعالة..." />
+
+                    </div>
+
+                </div>
+
+
+                <!-- CATEGORY -->
+
+                <div class="col-lg-4">
+
+                    <label class="filter-label">
+                        التصنيف
+                    </label>
+
+                    <select name="categoryId"
+                            class="form-select category-select"
+                            onchange="this.form.submit()">
+
+                        <option value="">
+                            جميع التصنيفات
+                        </option>
+
+                        @foreach (var category in categories)
+                        {
+                            <option value="@category.Id"
+                                    selected="@(Model.CategoryId == category.Id)">
+
+                                @category.Name
+
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <!-- BUTTONS -->
+
+                <div class="col-lg-2">
+
+                    <label class="filter-label">
+                        الإجراءات
+                    </label>
+
+                    <div class="filter-actions">
+
+                        <button type="submit"
+                                class="btn btn-primary btn-search">
+
+                            <i class="bi bi-search me-1"></i>
+
+                            بحث
+
+                        </button>
+
+
+                        <a asp-controller="Shop"
+                           asp-action="Index"
+                           class="btn btn-outline-secondary btn-reset"
+                           title="إعادة ضبط الفلاتر">
+
+                            <i class="bi bi-arrow-counterclockwise"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- CURRENT FILTER -->
+
+            @if (Model.CategoryId.HasValue || !string.IsNullOrWhiteSpace(Model.Search))
+            {
+                <div class="selected-filter">
+
+                    <i class="bi bi-sliders"></i>
+
+                    <span>
+                        الفلاتر الحالية:
+                    </span>
+
+
+                    @if (Model.CategoryId.HasValue)
+                    {
+                        var selectedCategory = categories
+                            .FirstOrDefault(c => c.Id == Model.CategoryId.Value);
+
+                        if (selectedCategory != null)
+                        {
+                            <strong>
+                                التصنيف: @selectedCategory.Name
+                            </strong>
+                        }
+                    }
+
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Search))
+                    {
+                        <strong>
+                            البحث: "@Model.Search"
+                        </strong>
+                    }
+
+                </div>
+            }
+
+        </form>
+
+    </div>
+
+
+    <!-- =====================================================
+         RESULTS HEADER
+         ===================================================== -->
+
+    <div class="results-header">
+
+        <div class="results-title-wrapper">
+
+            <div class="results-title-icon">
+
+                <i class="bi bi-capsule"></i>
+
+            </div>
+
+            <h4 class="results-title">
+                الأدوية
+            </h4>
+
+        </div>
+
+
+        <span class="results-count">
+
+            @medicines.Count() دواء
+
+        </span>
+
+    </div>
+
+
+    <!-- =====================================================
+         MEDICINES
+         ===================================================== -->
+
+    @if (medicines.Any())
+    {
+        <div class="row g-4">
+
+            @foreach (var medicine in medicines)
+            {
+                var validBatches = medicine.Batches?
+                    .Where(b =>
+                        b.ExpiryDate >= today &&
+                        b.RemainingUnits > 0)
+                    .OrderBy(b => b.ExpiryDate)
+                    .ToList()
+                    ?? new List<PharmaSphere.Domain.Entities.MedicineBatch>();
+
+
+                var activeBatch = validBatches.FirstOrDefault();
+
+
+                var availableStock = validBatches.Sum(
+                    b => b.RemainingUnits
+                );
+
+
+                var price = activeBatch?.SellingPrice ?? 0m;
+
+
+                var isAvailable = availableStock > 0;
+
+
+                <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+
+                    <div class="medicine-card
+                                @(isAvailable ? "" : "medicine-unavailable")">
+
+
+                        <!-- =====================================
+                             BADGES
+                             ===================================== -->
+
+                        <div class="medicine-badges">
+
+                            <div class="medicine-badges-left">
+
+
+                                @if (isAvailable)
+                                {
+                                    <span class="badge bg-success">
+
+                                        <i class="bi bi-check-circle-fill me-1"></i>
+
+                                        متوفر
+
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+
+                                        <i class="bi bi-x-circle-fill me-1"></i>
+
+                                        غير متوفر
+
+                                    </span>
+                                }
+
+
+                                @if (medicine.RequiresPrescription)
+                                {
+                                    <span class="badge bg-warning text-dark">
+
+                                        <i class="bi bi-file-medical-fill me-1"></i>
+
+                                        روشتة
+
+                                    </span>
+                                }
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =====================================
+                             MEDICINE INFORMATION
+                             ===================================== -->
+
+                        <div class="medicine-content">
+
+
+                            <!-- NAME -->
+
+                            <h5 class="medicine-name">
+
+                                @medicine.Name
+
+                            </h5>
+
+
+                            <!-- SCIENTIFIC NAME -->
+
+                            @if (!string.IsNullOrWhiteSpace(medicine.ScientificName))
+                            {
+                                <p class="medicine-scientific-name">
+
+                                    @medicine.ScientificName
+
+                                </p>
+                            }
+
+
+                            <!-- ACTIVE INGREDIENT -->
+
+                            @if (!string.IsNullOrWhiteSpace(medicine.ActiveIngredient))
+                            {
+                                <p class="medicine-active-ingredient">
+
+                                    المادة الفعالة:
+
+                                    <strong>
+                                        @medicine.ActiveIngredient
+                                    </strong>
+
+                                </p>
+                            }
+
+
+                            <!-- SPACE -->
+
+                            <div class="medicine-spacer"></div>
+
+
+                            <!-- PRICE -->
+
+                            <div class="medicine-price">
+
+                                @if (activeBatch != null)
+                                {
+                                    <span>
+                                        @price.ToString("N2")
+                                    </span>
+
+                                    <span class="medicine-price-unit">
+                                        جنيه
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="price-unavailable">
+                                        السعر غير متاح
+                                    </span>
+                                }
+
+                            </div>
+
+
+                            <!-- =================================
+                                 ACTIONS
+                                 ================================= -->
+
+                            <div class="medicine-actions">
+
+
+                                <!-- DETAILS -->
+
+                                <a asp-controller="Shop"
+                                   asp-action="Details"
+                                   asp-route-id="@medicine.Id"
+                                   class="btn btn-outline-primary btn-details">
+
+                                    <i class="bi bi-eye me-1"></i>
+
+                                    التفاصيل
+
+                                </a>
+
+
+                                <!-- ADD TO CART -->
+
+                                @if (isAvailable)
+                                {
+                                    <form asp-controller="Shop"
+                                          asp-action="AddToCart"
+                                          method="post"
+                                          class="add-to-cart-form">
+
+                                        @Html.AntiForgeryToken()
+
+
+                                        <input type="hidden"
+                                               name="medicineId"
+                                               value="@medicine.Id" />
+
+
+                                        <input type="hidden"
+                                               name="quantity"
+                                               value="1" />
+
+
+                                        <button type="submit"
+                                                class="btn btn-primary btn-add">
+
+                                            <i class="bi bi-cart-plus me-1"></i>
+
+                                            إضافة
+
+                                        </button>
+
+                                    </form>
+                                }
+                                else
+                                {
+                                    <button type="button"
+                                            class="btn btn-secondary flex-grow-1"
+                                            disabled>
+
+                                        <i class="bi bi-x-circle me-1"></i>
+
+                                        غير متوفر
+
+                                    </button>
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    }
+    else
+    {
+        <!-- =====================================================
+             EMPTY STATE
+             ===================================================== -->
+
+        <div class="empty-state">
+
+            <div class="empty-state-icon">
+
+                <i class="bi bi-capsule"></i>
+
+            </div>
+
+
+            @if (Model.CategoryId.HasValue)
+            {
+                <h4>
+                    لا توجد أدوية في هذا التصنيف
+                </h4>
+
+                <p>
+                    لم يتم العثور على أدوية متاحة داخل التصنيف المحدد.
+                </p>
+            }
+            else if (!string.IsNullOrWhiteSpace(Model.Search))
+            {
+                <h4>
+                    لم يتم العثور على نتائج
+                </h4>
+
+                <p>
+                    لم نجد أي دواء يطابق كلمة البحث "@Model.Search".
+                </p>
+            }
+            else
+            {
+                <h4>
+                    لا توجد أدوية
+                </h4>
+
+                <p>
+                    لا توجد أدوية متاحة حاليًا في الصيدلية.
+                </p>
+            }
+
+
+            <a asp-controller="Shop"
+               asp-action="Index"
+               class="btn btn-outline-primary">
+
+                <i class="bi bi-arrow-counterclockwise me-1"></i>
+
+                عرض جميع الأدوية
+
+            </a>
+
+        </div>
+    }
+
+</div>

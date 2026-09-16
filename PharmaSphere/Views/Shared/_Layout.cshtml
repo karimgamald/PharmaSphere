@@ -1,0 +1,1225 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using PharmaSphere.Domain.Entities
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        @ViewData["Title"] - PharmaSphere
+    </title>
+
+    <!-- =====================================================
+     Google Font
+====================================================== -->
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com" />
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin />
+
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap"
+          rel="stylesheet" />
+
+    <!-- =====================================================
+     Bootstrap 5 RTL
+====================================================== -->
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" />
+
+    <!-- =====================================================
+     Bootstrap Icons
+====================================================== -->
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+    <!-- =====================================================
+     PharmaSphere Global Styles
+====================================================== -->
+
+    <style>
+
+            :root {
+                --ps-primary: #0d6efd;
+                --ps-primary-dark: #0756c9;
+                --ps-dark: #0f172a;
+                --ps-dark-light: #172033;
+                --ps-body-bg: #f5f7fb;
+                --ps-border: #e5eaf1;
+                --ps-text: #172033;
+                --ps-muted: #7c8797;
+                --ps-white: #ffffff;
+                --ps-font: 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            }
+
+            /* =====================================================
+                   GLOBAL
+                ====================================================== */
+
+            html {
+                font-size: 15px;
+            }
+
+            body {
+                min-height: 100vh;
+                margin: 0;
+                font-family: var(--ps-font);
+                background-color: var(--ps-body-bg);
+                color: var(--ps-text);
+                letter-spacing: -0.15px;
+                -webkit-font-smoothing: antialiased;
+            }
+
+            a {
+                text-decoration: none;
+            }
+
+            /* =====================================================
+                   NAVBAR
+                ====================================================== */
+
+            .ps-navbar {
+                min-height: 70px;
+                background: linear-gradient(135deg, #0f172a, #111c32);
+                border-bottom: 1px solid rgba(255,255,255,.06);
+                box-shadow: 0 4px 20px rgba(15,23,42,.12);
+                backdrop-filter: blur(12px);
+            }
+
+            .ps-navbar-container {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+
+            /* =====================================================
+                   BRAND
+                ====================================================== */
+
+            .ps-brand {
+                display: inline-flex;
+                align-items: center;
+                gap: .7rem;
+                color: white !important;
+                font-weight: 800;
+                letter-spacing: -.5px;
+            }
+
+            .ps-brand-icon {
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 12px;
+                background: linear-gradient(135deg, #0d6efd, #0756c9);
+                color: white;
+                box-shadow: 0 6px 18px rgba(13,110,253,.25);
+                font-size: 1.2rem;
+            }
+
+            .ps-brand-name {
+                font-size: 1.25rem;
+                font-weight: 900;
+                line-height: 1;
+            }
+
+                .ps-brand-name span {
+                    color: #4d9aff;
+                }
+
+            /* =====================================================
+                   NAVIGATION
+                ====================================================== */
+
+            .ps-nav {
+                gap: .2rem;
+            }
+
+            .ps-nav-link {
+                position: relative;
+                display: flex;
+                align-items: center;
+                gap: .35rem;
+                padding: .55rem .75rem !important;
+                border-radius: 9px;
+                color: rgba(255,255,255,.62) !important;
+                font-size: .78rem;
+                font-weight: 700;
+                transition: color .2s ease, background .2s ease;
+            }
+
+                .ps-nav-link:hover {
+                    color: white !important;
+                    background: rgba(255,255,255,.07);
+                }
+
+                .ps-nav-link.active {
+                    color: white !important;
+                    background: rgba(13,110,253,.16);
+                }
+
+                    .ps-nav-link.active::after {
+                        content: "";
+                        position: absolute;
+                        bottom: -1px;
+                        right: 12px;
+                        left: 12px;
+                        height: 2px;
+                        border-radius: 5px;
+                        background: var(--ps-primary);
+                    }
+
+                .ps-nav-link i {
+                    font-size: .9rem;
+                }
+
+            /* =====================================================
+                   DROPDOWN
+                ====================================================== */
+
+            .ps-dropdown {
+                min-width: 230px;
+                margin-top: .65rem !important;
+                padding: .5rem;
+                border: 1px solid var(--ps-border);
+                border-radius: 14px;
+                background: white;
+                box-shadow: 0 18px 45px rgba(15,23,42,.14);
+            }
+
+            .ps-dropdown-item {
+                display: flex;
+                align-items: center;
+                gap: .65rem;
+                padding: .65rem .75rem;
+                border-radius: 9px;
+                color: #334155;
+                font-size: .78rem;
+                font-weight: 700;
+                transition: background .2s ease, color .2s ease, transform .2s ease;
+            }
+
+                .ps-dropdown-item:hover {
+                    color: var(--ps-primary);
+                    background: #f4f7fb;
+                    transform: translateX(-2px);
+                }
+
+                .ps-dropdown-item i {
+                    width: 20px;
+                    text-align: center;
+                    font-size: .95rem;
+                }
+
+            .ps-dropdown-title {
+                padding: .45rem .75rem .3rem;
+                color: #98a1af;
+                font-size: .62rem;
+                font-weight: 900;
+                letter-spacing: .8px;
+            }
+
+            /* =====================================================
+                   SERVER STATUS
+                ====================================================== */
+
+            .ps-server-status {
+                display: inline-flex;
+                align-items: center;
+                gap: .45rem;
+                padding: .45rem .7rem;
+                border: 1px solid rgba(32,201,151,.18);
+                border-radius: 50px;
+                background: rgba(32,201,151,.08);
+                color: #65e0b6;
+                font-size: .65rem;
+                font-weight: 800;
+            }
+
+            .ps-server-dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: #20c997;
+                box-shadow: 0 0 0 4px rgba(32,201,151,.12);
+            }
+
+            /* =====================================================
+                   USER AREA
+                ====================================================== */
+
+            .ps-user-area {
+                display: flex;
+                align-items: center;
+                gap: .6rem;
+                margin-right: .75rem;
+            }
+
+            .ps-user-info {
+                display: flex;
+                flex-direction: column;
+                line-height: 1.2;
+            }
+
+            .ps-user-name {
+                color: white;
+                font-size: .75rem;
+                font-weight: 800;
+            }
+
+            .ps-user-role {
+                color: rgba(255,255,255,.45);
+                font-size: .6rem;
+                font-weight: 600;
+            }
+
+            .ps-user-icon {
+                width: 38px;
+                height: 38px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                background: rgba(13,110,253,.2);
+                color: #75adff;
+                font-size: 1rem;
+            }
+
+            .ps-login-btn {
+                border-radius: 9px;
+                font-size: .72rem;
+                font-weight: 800;
+                padding: .5rem .8rem;
+            }
+
+            .ps-logout-btn {
+                border-radius: 9px;
+                font-size: .7rem;
+                font-weight: 700;
+            }
+
+            /* =====================================================
+                   TOGGLER
+                ====================================================== */
+
+            .ps-toggler {
+                border: 0 !important;
+                padding: .4rem;
+                box-shadow: none !important;
+            }
+
+            /* =====================================================
+                   MAIN CONTENT
+                ====================================================== */
+
+            .ps-main {
+                width: 100%;
+                padding: 1.5rem 1.5rem 2.5rem;
+            }
+
+            /* =====================================================
+                   FOOTER
+                ====================================================== */
+
+            .ps-footer {
+                background: white;
+                border-top: 1px solid var(--ps-border);
+                color: #8a94a5;
+                font-size: .68rem;
+            }
+
+                .ps-footer strong {
+                    color: #1e293b;
+                }
+
+            .ps-footer-security {
+                display: inline-flex;
+                align-items: center;
+                gap: .35rem;
+                color: #667085;
+            }
+
+                .ps-footer-security i {
+                    color: var(--ps-primary);
+                }
+
+            /* =====================================================
+                   SCROLLBAR
+                ====================================================== */
+
+            ::-webkit-scrollbar {
+                width: 7px;
+                height: 7px;
+            }
+
+            ::-webkit-scrollbar-track {
+                background: #f1f4f8;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 10px;
+            }
+
+                ::-webkit-scrollbar-thumb:hover {
+                    background: #94a3b8;
+                }
+
+            /* =====================================================
+                   RESPONSIVE
+                ====================================================== */
+
+            @@media (max-width: 1199px) {
+
+                .ps-nav-link {
+                    padding-left: .55rem !important;
+                    padding-right: .55rem !important;
+                }
+
+                    .ps-nav-link span {
+                        display: none;
+                    }
+
+                    .ps-nav-link i {
+                        margin: 0 !important;
+                    }
+            }
+
+            @@media (max-width: 991px) {
+
+                .ps-navbar-container {
+                    padding-left: 1rem;
+                    padding-right: 1rem;
+                }
+
+                .ps-nav {
+                    padding-top: 1rem;
+                    gap: .25rem;
+                }
+
+                .ps-nav-link {
+                    justify-content: flex-start;
+                    padding: .7rem .85rem !important;
+                }
+
+                    .ps-nav-link span {
+                        display: inline;
+                    }
+
+                    .ps-nav-link.active::after {
+                        display: none;
+                    }
+
+                .ps-dropdown {
+                    margin-top: .25rem !important;
+                    border: 0;
+                    box-shadow: none;
+                    background: #111c32;
+                }
+
+                .ps-dropdown-item {
+                    color: rgba(255,255,255,.65);
+                }
+
+                    .ps-dropdown-item:hover {
+                        color: white;
+                        background: rgba(255,255,255,.07);
+                    }
+
+                .ps-dropdown-title {
+                    color: rgba(255,255,255,.35);
+                }
+
+                .ps-server-status {
+                    margin: .75rem 0 1rem;
+                }
+
+                .ps-user-area {
+                    margin: .75rem 0;
+                    padding: .5rem 0;
+                }
+
+                .ps-main {
+                    padding: 1rem 1rem 2rem;
+                }
+            }
+
+            @@media (max-width: 576px) {
+
+                .ps-brand-name {
+                    font-size: 1.05rem;
+                }
+
+                .ps-brand-icon {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 10px;
+                }
+            }
+
+    </style>
+
+    @RenderSection("Styles", required: false)
+    ```
+
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+    ```
+    <!-- =====================================================
+     HEADER
+====================================================== -->
+
+    <header>
+
+        <nav class="navbar navbar-expand-lg navbar-dark ps-navbar sticky-top">
+
+            <div class="container-fluid ps-navbar-container">
+
+                <!-- =================================================
+                 BRAND
+            ================================================== -->
+
+                <a class="ps-brand"
+                   asp-controller="Home"
+                   asp-action="Index">
+
+                    <div class="ps-brand-icon">
+                        <i class="bi bi-capsule-pill"></i>
+                    </div>
+
+                    <div class="ps-brand-name">
+                        Pharma<span>Sphere</span>
+                    </div>
+
+                </a>
+
+
+                <!-- =================================================
+                 MOBILE TOGGLE
+            ================================================== -->
+
+                <button class="navbar-toggler ps-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#mainNavbar"
+                        aria-controls="mainNavbar"
+                        aria-expanded="false"
+                        aria-label="فتح القائمة">
+
+                    <span class="navbar-toggler-icon"></span>
+
+                </button>
+
+
+                <!-- =================================================
+                 NAVIGATION
+            ================================================== -->
+
+                <div class="collapse navbar-collapse"
+                     id="mainNavbar">
+
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ps-nav">
+
+
+                        <!-- =================================================
+                         HOME
+                    ================================================== -->
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item">
+
+                                <a class="nav-link ps-nav-link"
+                                   asp-controller="Home"
+                                   asp-action="Index">
+
+                                    <i class="bi bi-grid-1x2"></i>
+
+                                    <span>الرئيسية</span>
+
+                                </a>
+
+                            </li>
+                        }
+
+
+                        <!-- =================================================
+                         ADMIN
+                    ================================================== -->
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+
+                                <a class="nav-link ps-nav-link"
+                                   asp-controller="Users"
+                                   asp-action="Index">
+
+                                    <i class="bi bi-people-fill"></i>
+
+                                    <span>المستخدمون</span>
+
+                                </a>
+
+                            </li>
+                        }
+
+
+                        <!-- =================================================
+                         POS
+                         Admin + Pharmacist
+                    ================================================== -->
+                        @if (User.IsInRole("Admin") ||
+                                                 User.IsInRole("Pharmacist"))
+                        {
+                            <li class="nav-item">
+
+                                <a class="nav-link ps-nav-link"
+                                   asp-controller="Pos"
+                                   asp-action="Index">
+
+                                    <i class="bi bi-cash-register"></i>
+
+                                    <span>نقطة البيع</span>
+
+                                </a>
+
+                            </li>
+                        }
+
+
+                        <!-- =================================================
+                         MEDICINES
+                         Admin + Pharmacist
+                    ================================================== -->
+                        @if (User.IsInRole("Admin") ||
+                                                 User.IsInRole("Pharmacist"))
+                        {
+                            <li class="nav-item dropdown">
+
+                                <a class="nav-link ps-nav-link dropdown-toggle"
+                                   href="#"
+                                   id="medicineDropdown"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+
+                                    <i class="bi bi-capsule-pill"></i>
+
+                                    <span>الأدوية والمخزون</span>
+
+                                </a>
+
+
+                                <ul class="dropdown-menu dropdown-menu-end ps-dropdown">
+
+                                    <li class="ps-dropdown-title">
+                                        إدارة المخزون
+                                    </li>
+
+
+                                    <li>
+
+                                        <a class="dropdown-item ps-dropdown-item"
+                                           asp-controller="Medicine"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-capsule text-danger"></i>
+
+                                            كتالوج الأدوية
+
+                                        </a>
+
+                                    </li>
+
+
+                                    <li>
+
+                                        <a class="dropdown-item ps-dropdown-item"
+                                           asp-controller="Categories"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-tags"
+                                               style="color:#7e22ce;"></i>
+
+                                            التصنيفات الدوائية
+
+                                        </a>
+
+                                    </li>
+
+
+                                    <li>
+
+                                        <a class="dropdown-item ps-dropdown-item"
+                                           asp-controller="MedicineBatches"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-calendar2-check text-primary"></i>
+
+                                            التشغيلات والـ FEFO
+
+                                        </a>
+
+                                    </li>
+
+
+                                    <li>
+
+                                        <a class="dropdown-item ps-dropdown-item"
+                                           asp-controller="Medicine"
+                                           asp-action="Substitutes">
+
+                                            <i class="bi bi-search text-info"></i>
+
+                                            البدائل الدوائية
+
+                                        </a>
+
+                                    </li>
+
+
+                                    <li>
+
+                                        <a class="dropdown-item ps-dropdown-item"
+                                           asp-controller="Medicine"
+                                           asp-action="UnitUnitsConfig">
+
+                                            <i class="bi bi-box-seam text-warning"></i>
+
+                                            إعدادات الوحدات
+
+                                        </a>
+
+                                    </li>
+
+                                </ul>
+
+                            </li>
+                        }
+
+
+                        <!-- =================================================
+                         PRESCRIPTIONS
+                         Admin + Pharmacist
+                    ================================================== -->
+                        @if (User.IsInRole("Admin") ||
+                                                 User.IsInRole("Pharmacist"))
+                        {
+                            <li class="nav-item">
+
+                                <a class="nav-link ps-nav-link"
+                                   asp-controller="Prescriptions"
+                                   asp-action="Index">
+
+                                    <i class="bi bi-file-earmark-medical"></i>
+
+                                    <span>الروشتات</span>
+
+                                </a>
+
+                            </li>
+                        }
+
+
+                        <!-- =================================================
+                         PURCHASING
+                         Admin + Pharmacist
+                    ================================================== -->
+                        @if (User.IsInRole("Admin") ||
+                                                 User.IsInRole("Pharmacist"))
+                        {
+                            <li class="nav-item dropdown">
+
+                                <a class="nav-link ps-nav-link dropdown-toggle"
+                                   href="#"
+                                   id="purchaseDropdown"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+
+                                    <i class="bi bi-truck"></i>
+
+                                    <span>التوريد والمالية</span>
+
+                                </a>
+
+
+                                <ul class="dropdown-menu dropdown-menu-end ps-dropdown">
+
+                                    <li class="ps-dropdown-title">
+                                        المشتريات
+                                    </li>
+
+
+                                    <li>
+
+                                        <a class="dropdown-item ps-dropdown-item"
+                                           asp-controller="Suppliers"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-building text-dark"></i>
+
+                                            إدارة الموردين
+
+                                        </a>
+
+                                    </li>
+
+
+                                    <li>
+
+                                        <a class="dropdown-item ps-dropdown-item"
+                                           asp-controller="PurchaseOrders"
+                                           asp-action="Create">
+
+                                            <i class="bi bi-plus-circle text-primary"></i>
+
+                                            تسجيل شحنة توريد
+
+                                        </a>
+
+                                    </li>
+
+
+                                    <li>
+
+                                        <a class="dropdown-item ps-dropdown-item"
+                                           asp-controller="Returns"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-arrow-counterclockwise text-secondary"></i>
+
+                                            المرتجعات والتسويات
+
+                                        </a>
+
+                                    </li>
+
+
+                                    <li>
+                                        <hr class="dropdown-divider" />
+                                    </li>
+
+
+                                    <li class="ps-dropdown-title">
+                                        التحليلات
+                                    </li>
+
+
+                                    <li>
+
+                                        <a class="dropdown-item ps-dropdown-item"
+                                           asp-controller="Reports"
+                                           asp-action="ProfitReport">
+
+                                            <i class="bi bi-graph-up-arrow text-success"></i>
+
+                                            تقرير الأرباح
+
+                                        </a>
+
+                                    </li>
+
+                                </ul>
+
+                            </li>
+                        }
+
+
+                        <!-- =================================================
+                         SYSTEM
+                         Admin only
+                    ================================================== -->
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item dropdown">
+
+                                <a class="nav-link ps-nav-link dropdown-toggle"
+                                   href="#"
+                                   id="systemDropdown"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+
+                                    <i class="bi bi-gear-wide-connected"></i>
+
+                                    <span>النظام والمراقبة</span>
+
+                                </a>
+
+
+                                <ul class="dropdown-menu dropdown-menu-end ps-dropdown">
+
+                                    <li class="ps-dropdown-title">
+                                        النظام
+                                    </li>
+
+
+                                    <li>
+
+                                        <a class="dropdown-item ps-dropdown-item"
+                                           asp-controller="Medicine"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-boxes text-success"></i>
+
+                                            مراقبة المخزون
+
+                                        </a>
+
+                                    </li>
+
+
+                                    <li>
+
+                                        <a class="dropdown-item ps-dropdown-item"
+                                           asp-controller="AuditLog"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-shield-check"
+                                               style="color:#7e22ce;"></i>
+
+                                            سجل العمليات والأنشطة
+
+                                        </a>
+
+                                    </li>
+
+                                </ul>
+
+                            </li>
+                        }
+
+
+                        <!-- =================================================
+                         ONLINE STORE
+                         Everyone can see it
+                    ================================================== -->
+
+                        <li class="nav-item">
+
+                            <a class="nav-link ps-nav-link"
+                               asp-controller="Shop"
+                               asp-action="Index">
+
+                                <i class="bi bi-shop"></i>
+
+                                <span>المتجر الإلكتروني</span>
+
+                            </a>
+
+                        </li>
+
+
+                        <!-- =================================================
+                         DELIVERY
+                         Admin + DeliveryBoy
+                    ================================================== -->
+                        @if (User.IsInRole("Admin") ||
+                                                 User.IsInRole("DeliveryBoy"))
+                        {
+                            <li class="nav-item">
+
+                                <a class="nav-link ps-nav-link"
+                                   asp-controller="Delivery"
+                                   asp-action="Index">
+
+                                    <i class="bi bi-truck"></i>
+
+                                    <span>التوصيل</span>
+
+                                </a>
+
+                            </li>
+                        }
+
+                    </ul>
+
+
+                    <!-- =================================================
+                     RIGHT SIDE
+                ================================================== -->
+
+                    <div class="d-flex align-items-center gap-2">
+
+
+                        <!-- =================================================
+                         SERVER STATUS
+                    ================================================== -->
+
+                        <div class="ps-server-status">
+
+                            <span class="ps-server-dot"></span>
+
+                            <span>
+                                متصل بالخادم
+                            </span>
+
+                        </div>
+
+
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <!-- =================================================
+                             USER INFO
+                        ================================================== -->
+                            var currentUser =
+                                                        await UserManager.GetUserAsync(User);
+
+                            <div class="ps-user-area">
+
+                                <div class="ps-user-icon">
+
+                                    <i class="bi bi-person-fill"></i>
+
+                                </div>
+
+
+                                <div class="ps-user-info">
+
+                                    <span class="ps-user-name">
+
+                                        @(currentUser?.FullName
+                                            ?? User.Identity?.Name
+                                            ?? "المستخدم")
+
+                                    </span>
+
+
+                                    <span class="ps-user-role">
+
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            @:مدير النظام
+                                        }
+                                        else if (User.IsInRole("Pharmacist"))
+                                        {
+                                            @:صيدلي
+                                        }
+                                        else if (User.IsInRole("DeliveryBoy"))
+                                        {
+                                            @:مندوب توصيل
+                                        }
+                                        else
+                                        {
+                                            @:عميل
+                                        }
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- =================================================
+                             LOGOUT
+                        ================================================== -->
+
+                            <form asp-controller="Account"
+                                  asp-action="Logout"
+                                  method="post"
+                                  class="d-inline">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="btn btn-outline-danger ps-logout-btn">
+
+                                    <i class="bi bi-box-arrow-right"></i>
+
+                                    تسجيل الخروج
+
+                                </button>
+
+                            </form>
+
+                        }
+                        else
+                        {
+                            <!-- =================================================
+                             LOGIN
+                        ================================================== -->
+
+                            <a asp-controller="Account"
+                               asp-action="Login"
+                               class="btn btn-outline-light ps-login-btn">
+
+                                <i class="bi bi-box-arrow-in-left"></i>
+
+                                تسجيل الدخول
+
+                            </a>
+
+
+                            <!-- =================================================
+                             REGISTER
+                        ================================================== -->
+
+                            <a asp-controller="Account"
+                               asp-action="Register"
+                               class="btn btn-primary ps-login-btn">
+
+                                <i class="bi bi-person-plus"></i>
+
+                                إنشاء حساب
+
+                            </a>
+
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </nav>
+
+    </header>
+
+
+    <!-- =====================================================
+     MAIN
+====================================================== -->
+
+    <main role="main"
+          class="ps-main flex-grow-1">
+
+        @RenderBody()
+
+    </main>
+
+
+    <!-- =====================================================
+     FOOTER
+====================================================== -->
+
+    <footer class="ps-footer py-3 mt-auto">
+
+        <div class="container-fluid px-4">
+
+            <div class="d-flex
+                flex-column
+                flex-md-row
+                justify-content-between
+                align-items-center
+                gap-2">
+
+                <div>
+
+                    &copy; 2026
+
+                    <strong>
+                        PharmaSphere
+                    </strong>
+
+                    —
+
+                    نظام إدارة الصيدليات والعمليات اللوجستية.
+
+                </div>
+
+
+                <div class="ps-footer-security">
+
+                    <i class="bi bi-shield-check"></i>
+
+                    <span>
+                        منصة آمنة لإدارة عمليات الصيدلية
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- =====================================================
+     Bootstrap JS
+====================================================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+
+    <!-- =====================================================
+     Page Scripts
+====================================================== -->
+    @await RenderSectionAsync("Scripts", required: false)
+
+
+    <!-- =====================================================
+     Active Navigation
+====================================================== -->
+
+    <script>
+
+            document.addEventListener("DOMContentLoaded", function () {
+
+                const currentController =
+                    '@ViewContext.RouteData.Values["controller"]';
+
+                const currentAction =
+                    '@ViewContext.RouteData.Values["action"]';
+
+
+                document
+                    .querySelectorAll(".ps-nav-link")
+                    .forEach(function (link) {
+
+                        const href =
+                            link.getAttribute("href");
+
+                        if (!href || href === "#")
+                            return;
+
+
+                        const url =
+                            new URL(href, window.location.origin);
+
+
+                        const controller =
+                            url.searchParams.get("controller");
+
+
+                        const action =
+                            url.searchParams.get("action");
+
+
+                        if (controller === currentController) {
+
+                            if (!action || action === currentAction) {
+
+                                link.classList.add("active");
+
+                            }
+
+                        }
+
+                    });
+
+            });
+
+    </script>
+
+</body>
+
+</html>

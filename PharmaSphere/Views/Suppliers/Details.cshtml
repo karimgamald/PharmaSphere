@@ -1,0 +1,533 @@
+﻿@model PharmaSphere.Domain.Entities.Supplier
+
+@{
+    ViewData["Title"] = "تفاصيل المورد - " + Model.Name;
+    var purchaseOrders = Model.PurchaseOrders
+        .OrderByDescending(po => po.OrderDate)
+        .ToList();
+    var totalPurchaseOrders = purchaseOrders.Count;
+    var totalPurchases = purchaseOrders.Sum(po => po.TotalAmount);
+}
+
+<div class="container-fluid py-3" dir="rtl">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-building text-primary me-2"></i>
+                تفاصيل المورد
+            </h3>
+
+            <p class="text-muted small mb-0">
+                عرض بيانات المورد وسجل أوامر الشراء المرتبطة به.
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a asp-action="Edit"
+               asp-route-id="@Model.Id"
+               class="btn btn-primary rounded-3 px-4">
+                <i class="bi bi-pencil me-1"></i>
+                تعديل البيانات
+            </a>
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary rounded-3">
+                <i class="bi bi-arrow-right me-1"></i>
+                العودة للقائمة
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Supplier Summary -->
+    <div class="row g-4 mb-4">
+
+        <!-- Supplier Information -->
+        <div class="col-lg-5">
+
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                <div class="card-header bg-white border-0 p-4 pb-2">
+
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3">
+                            <i class="bi bi-building fs-4"></i>
+                        </div>
+
+                        <div>
+
+                            <h5 class="fw-bold mb-1">
+                                @Model.Name
+                            </h5>
+
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    مورد نشط
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill">
+                                    <i class="bi bi-pause-circle me-1"></i>
+                                    مورد غير نشط
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-body p-4">
+
+                    <!-- Name -->
+                    <div class="d-flex justify-content-between align-items-start border-bottom py-3">
+
+                        <div class="text-muted">
+                            <i class="bi bi-building me-2"></i>
+                            اسم المورد
+                        </div>
+
+                        <strong class="text-dark text-end">
+                            @Model.Name
+                        </strong>
+
+                    </div>
+
+
+                    <!-- Phone -->
+                    <div class="d-flex justify-content-between align-items-start border-bottom py-3">
+
+                        <div class="text-muted">
+                            <i class="bi bi-telephone me-2"></i>
+                            رقم الهاتف
+                        </div>
+
+                        <div class="text-end">
+
+                            @if (!string.IsNullOrWhiteSpace(Model.Phone))
+                            {
+                                <a href="tel:@Model.Phone"
+                                   class="text-decoration-none fw-semibold text-dark">
+                                    @Model.Phone
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">
+                                    غير مسجل
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Email -->
+                    <div class="d-flex justify-content-between align-items-start border-bottom py-3">
+
+                        <div class="text-muted">
+                            <i class="bi bi-envelope me-2"></i>
+                            البريد الإلكتروني
+                        </div>
+
+                        <div class="text-end">
+
+                            @if (!string.IsNullOrWhiteSpace(Model.Email))
+                            {
+                                <a href="mailto:@Model.Email"
+                                   class="text-decoration-none fw-semibold text-dark">
+                                    @Model.Email
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">
+                                    غير مسجل
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Address -->
+                    <div class="d-flex justify-content-between align-items-start py-3">
+
+                        <div class="text-muted">
+                            <i class="bi bi-geo-alt me-2"></i>
+                            العنوان
+                        </div>
+
+                        <div class="text-end">
+
+                            @if (!string.IsNullOrWhiteSpace(Model.Address))
+                            {
+                                <span class="text-dark">
+                                    @Model.Address
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">
+                                    غير مسجل
+                                </span>
+                            }
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Status Action -->
+                    <div class="mt-4">
+
+                        @if (Model.IsActive)
+                        {
+                            <form asp-action="Deactivate"
+                                  asp-route-id="@Model.Id"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="btn btn-outline-warning w-100 rounded-3"
+                                        onclick="return confirm('هل أنت متأكد من تعطيل هذا المورد؟');">
+
+                                    <i class="bi bi-pause-circle me-1"></i>
+                                    تعطيل المورد
+
+                                </button>
+
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="Activate"
+                                  asp-route-id="@Model.Id"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="btn btn-outline-success w-100 rounded-3"
+                                        onclick="return confirm('هل أنت متأكد من تفعيل هذا المورد؟');">
+
+                                    <i class="bi bi-play-circle me-1"></i>
+                                    تفعيل المورد
+
+                                </button>
+
+                            </form>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Statistics -->
+        <div class="col-lg-7">
+
+            <div class="row g-3">
+
+                <!-- Purchase Orders -->
+                <div class="col-md-6">
+
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                        <div class="card-body p-4">
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-3">
+                                    <i class="bi bi-receipt fs-4"></i>
+                                </div>
+
+                                <div>
+                                    <div class="text-muted small">
+                                        إجمالي أوامر الشراء
+                                    </div>
+
+                                    <div class="fs-3 fw-bold text-dark">
+                                        @totalPurchaseOrders
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Total Purchases -->
+                <div class="col-md-6">
+
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+
+                        <div class="card-body p-4">
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                <div class="bg-success bg-opacity-10 text-success rounded-3 p-3">
+                                    <i class="bi bi-cash-stack fs-4"></i>
+                                </div>
+
+                                <div>
+                                    <div class="text-muted small">
+                                        إجمالي المشتريات
+                                    </div>
+
+                                    <div class="fs-4 fw-bold text-success">
+                                        @totalPurchases.ToString("N2")
+                                    </div>
+
+                                    <small class="text-muted">
+                                        جنيه مصري
+                                    </small>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Supplier ID -->
+                <div class="col-12">
+
+                    <div class="card border-0 shadow-sm rounded-4">
+
+                        <div class="card-body p-4">
+
+                            <div class="d-flex align-items-center gap-3">
+
+                                <div class="bg-secondary bg-opacity-10 text-secondary rounded-3 p-3">
+                                    <i class="bi bi-hash fs-4"></i>
+                                </div>
+
+                                <div>
+
+                                    <div class="text-muted small">
+                                        معرف المورد
+                                    </div>
+
+                                    <div class="fw-bold text-dark">
+                                        #@Model.Id
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Purchase Orders -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+        <div class="card-header bg-white border-0 p-4">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-receipt-cutoff text-primary me-2"></i>
+                        سجل أوامر الشراء
+                    </h5>
+
+                    <p class="text-muted small mb-0">
+                        جميع أوامر الشراء المرتبطة بهذا المورد.
+                    </p>
+                </div>
+
+                <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">
+                    @totalPurchaseOrders أمر شراء
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th class="ps-4">
+                                رقم الفاتورة
+                            </th>
+
+                            <th>
+                                التاريخ
+                            </th>
+
+                            <th>
+                                عدد الدفعات
+                            </th>
+
+                            <th class="text-end">
+                                الإجمالي
+                            </th>
+
+                            <th class="pe-4 text-end">
+                                التفاصيل
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @if (purchaseOrders.Any())
+                        {
+                            foreach (var po in purchaseOrders)
+                            {
+                                <tr>
+
+                                    <!-- Invoice -->
+                                    <td class="ps-4">
+
+                                        <span class="fw-bold text-primary">
+                                            #@(string.IsNullOrWhiteSpace(po.InvoiceNumber)
+                                                                                            ? po.Id.ToString()
+                                                                                            : po.InvoiceNumber)
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Date -->
+                                    <td>
+
+                                        <span class="text-muted">
+                                            <i class="bi bi-calendar3 me-1"></i>
+                                            @po.OrderDate.ToString("yyyy-MM-dd")
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Batches -->
+                                    <td>
+
+                                        <span class="badge bg-light text-dark border rounded-pill px-3">
+
+                                            <i class="bi bi-box-seam me-1"></i>
+
+                                            @(po.Batches?.Count ?? 0)
+                                            دفعات
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Total -->
+                                    <td class="text-end">
+
+                                        <span class="fw-bold text-success">
+                                            @po.TotalAmount.ToString("N2")
+                                            <small class="text-muted">ج.م</small>
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- Details -->
+                                    <td class="pe-4 text-end">
+
+                                        <a asp-controller="PurchaseOrders"
+                                           asp-action="Details"
+                                           asp-route-id="@po.Id"
+                                           class="btn btn-sm btn-outline-primary rounded-3"
+                                           title="عرض تفاصيل أمر الشراء">
+
+                                            <i class="bi bi-eye me-1"></i>
+                                            التفاصيل
+
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="5"
+                                    class="text-center py-5">
+
+                                    <div class="text-muted">
+
+                                        <i class="bi bi-receipt fs-1 d-block mb-3 opacity-50"></i>
+
+                                        <h6 class="fw-bold">
+                                            لا توجد أوامر شراء
+                                        </h6>
+
+                                        <p class="small mb-0">
+                                            لم يتم تسجيل أي أوامر شراء لهذا المورد حتى الآن.
+                                        </p>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

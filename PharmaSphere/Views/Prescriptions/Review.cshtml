@@ -1,0 +1,75 @@
+﻿@model PharmaSphere.Domain.Entities.Prescription
+
+@{
+    ViewData["Title"] = "مراجعة الروشتة الطبية #" + Model.Id;
+}
+
+<div class="container py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1"><i class="bi bi-file-earmark-medical text-primary me-2"></i>مراجعة الروشتة الطبية</h3>
+            <span class="text-muted small">تاريخ الرفع: @Model.UploadedAt.ToLocalTime().ToString("g")</span>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary rounded-3">العودة للروشتات</a>
+    </div>
+
+    <div class="row g-4">
+        <!-- عرض صورة الروشتة -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 p-3 text-center bg-light">
+                <p class="fw-semibold text-muted mb-2"><i class="bi bi-image me-1"></i>صورة الروشتة المرفوعة</p>
+                <div class="overflow-hidden rounded-3 border bg-white p-2">
+                    <img src="@Model.ImagePath" class="img-fluid rounded-3" alt="صورة الروشتة" style="max-height: 500px; object-fit: contain;" />
+                </div>
+            </div>
+        </div>
+
+        <!-- نموذج التقييم واتخاذ الإجراء -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold text-dark mb-3">بيانات العميل والإجراء</h5>
+                <hr class="mt-0" />
+
+                <div class="mb-3">
+                    <span class="text-muted d-block small">اسم العميل</span>
+                    <strong class="text-dark fs-6">@(Model.Client?.UserName ?? Model.ClientId)</strong>
+                </div>
+
+                <div class="mb-3">
+                    <span class="text-muted d-block small">حالة الروشتة الحالية</span>
+                    <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3 py-2 mt-1">
+                        @Model.Status.ToString()
+                    </span>
+                </div>
+
+                <form asp-action="Review" method="post" class="mt-4">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="mb-3">
+                        <label asp-for="Status" class="form-label fw-semibold">تحديث الحالة</label>
+                        <select asp-for="Status" asp-items="Html.GetEnumSelectList<PharmaSphere.Domain.Enums.PrescriptionStatus>()" class="form-select rounded-3">
+                        </select>
+                        <span asp-validation-for="Status" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="PharmacistNotes" class="form-label fw-semibold">ملاحظات الصيدلي للعميل</label>
+                        <textarea asp-for="PharmacistNotes" rows="4" class="form-control rounded-3" placeholder="اكتب الملاحظات أو الأدوية المطلوبة هنا..."></textarea>
+                        <span asp-validation-for="PharmacistNotes" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary rounded-3 fw-bold">
+                            <i class="bi bi-check2-circle me-1"></i> حفظ التحديث
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

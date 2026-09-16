@@ -1,0 +1,642 @@
+﻿@model PharmaSphere.Domain.Entities.Medicine
+
+@{
+    ViewData["Title"] = "تفعيل الدواء";
+}
+
+<div class="status-page" dir="rtl">
+
+    <div class="status-container">
+
+        <!-- HEADER -->
+        <div class="status-header">
+
+            <div class="status-icon activate-icon">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+
+            <div>
+                <span class="status-label activate-label">
+                    تغيير حالة الدواء
+                </span>
+
+                <h2>
+                    تفعيل الدواء
+                </h2>
+
+                <p>
+                    يرجى التأكد من رغبتك في إعادة تفعيل هذا الدواء.
+                </p>
+            </div>
+
+        </div>
+
+
+        <!-- INFO -->
+        <div class="status-info">
+
+            <div class="info-icon">
+                <i class="bi bi-info-circle-fill"></i>
+            </div>
+
+            <div>
+
+                <strong>
+                    ماذا سيحدث عند التفعيل؟
+                </strong>
+
+                <p>
+                    سيتم إعادة الدواء إلى الحالة النشطة داخل النظام،
+                    مع الاحتفاظ بجميع بياناته والتشغيلات والمخزون
+                    المرتبط به.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- MEDICINE CARD -->
+        <div class="medicine-card">
+
+            <div class="medicine-card-header">
+
+                @if (!string.IsNullOrEmpty(Model.ImagePath))
+                {
+                    <img src="@Model.ImagePath"
+                         alt="@Model.Name"
+                         class="medicine-img-preview" />
+                }
+                else
+                {
+                    <div class="medicine-icon">
+                        <i class="bi bi-capsule-pill"></i>
+                    </div>
+                }
+
+                <div>
+
+                    <span>الدواء المحدد</span>
+
+                    <h4>
+                        @Model.Name
+                    </h4>
+
+                </div>
+
+            </div>
+
+
+            <div class="medicine-details">
+
+                <!-- Commercial Name -->
+                <div class="detail-item">
+
+                    <div class="detail-icon">
+                        <i class="bi bi-tag"></i>
+                    </div>
+
+                    <div class="detail-content">
+
+                        <span>الاسم التجاري</span>
+
+                        <strong>
+                            @Model.Name
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Scientific Name -->
+                <div class="detail-item">
+
+                    <div class="detail-icon">
+                        <i class="bi bi-flask"></i>
+                    </div>
+
+                    <div class="detail-content">
+
+                        <span>الاسم العلمي</span>
+
+                        <strong>
+                            @(string.IsNullOrWhiteSpace(Model.ScientificName)
+                                ? "غير محدد"
+                                : Model.ScientificName)
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Active Ingredient -->
+                <div class="detail-item">
+
+                    <div class="detail-icon">
+                        <i class="bi bi-capsule"></i>
+                    </div>
+
+                    <div class="detail-content">
+
+                        <span>المادة الفعالة</span>
+
+                        <strong>
+                            @(string.IsNullOrWhiteSpace(Model.ActiveIngredient)
+                                ? "غير محدد"
+                                : Model.ActiveIngredient)
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Category -->
+                <div class="detail-item">
+
+                    <div class="detail-icon">
+                        <i class="bi bi-grid"></i>
+                    </div>
+
+                    <div class="detail-content">
+
+                        <span>التصنيف</span>
+
+                        <strong>
+                            @(Model.Category?.Name ?? "غير محدد")
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Barcode -->
+                <div class="detail-item">
+
+                    <div class="detail-icon">
+                        <i class="bi bi-upc-scan"></i>
+                    </div>
+
+                    <div class="detail-content">
+
+                        <span>الباركود</span>
+
+                        <strong>
+                            @(string.IsNullOrWhiteSpace(Model.Barcode)
+                                ? "لا يوجد"
+                                : Model.Barcode)
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Stock -->
+                <div class="detail-item">
+
+                    <div class="detail-icon stock-icon">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+
+                    <div class="detail-content">
+
+                        <span>إجمالي المخزون</span>
+
+                        <strong class="stock-value">
+                            @Model.TotalStockUnits
+                            <small>وحدة</small>
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CONFIRMATION -->
+        <div class="confirmation-text activate-confirmation">
+
+            <i class="bi bi-shield-check"></i>
+
+            <span>
+
+                هل أنت متأكد أنك تريد تفعيل
+                <strong>@Model.Name</strong>؟
+
+            </span>
+
+        </div>
+
+
+        <!-- ACTIONS -->
+        <form asp-action="Activate"
+              method="post">
+
+            <input type="hidden"
+                   asp-for="Id" />
+
+            <div class="status-actions">
+
+                <a asp-action="Index"
+                   class="cancel-button">
+
+                    <i class="bi bi-arrow-right"></i>
+
+                    إلغاء والعودة
+
+                </a>
+
+
+                <button type="submit"
+                        class="activate-button">
+
+                    <i class="bi bi-check-circle-fill"></i>
+
+                    نعم، تفعيل الدواء
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    /* =========================================
+           PAGE
+        ========================================= */
+
+    .status-page {
+        min-height: calc(100vh - 100px);
+        padding: 3rem 1rem;
+        background: #f6f8fb;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    .status-container {
+        width: 100%;
+        max-width: 720px;
+    }
+
+
+    /* =========================================
+           HEADER
+        ========================================= */
+
+    .status-header {
+        background: white;
+        border: 1px solid #e9edf3;
+        border-radius: 22px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 30px rgba(31, 45, 61, .05);
+    }
+
+    .status-icon {
+        width: 64px;
+        height: 64px;
+        min-width: 64px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.7rem;
+    }
+
+    .activate-icon {
+        background: #ecfdf3;
+        color: #16a34a;
+    }
+
+    .status-label {
+        display: inline-block;
+        padding: .3rem .65rem;
+        border-radius: 50px;
+        font-size: .68rem;
+        font-weight: 800;
+        margin-bottom: .3rem;
+    }
+
+    .activate-label {
+        color: #15803d;
+        background: #ecfdf3;
+    }
+
+    .status-header h2 {
+        margin: 0 0 .25rem;
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #172033;
+    }
+
+    .status-header p {
+        margin: 0;
+        color: #8a93a3;
+        font-size: .8rem;
+    }
+
+
+    /* =========================================
+           INFO
+        ========================================= */
+
+    .status-info {
+        display: flex;
+        align-items: flex-start;
+        gap: .9rem;
+        padding: 1.15rem;
+        border-radius: 16px;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        margin-bottom: 1rem;
+    }
+
+    .info-icon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border-radius: 12px;
+        background: #dbeafe;
+        color: #2563eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .status-info strong {
+        display: block;
+        color: #1e40af;
+        font-size: .85rem;
+        margin-bottom: .25rem;
+    }
+
+    .status-info p {
+        margin: 0;
+        color: #41628e;
+        font-size: .75rem;
+        line-height: 1.7;
+    }
+
+
+    /* =========================================
+           MEDICINE CARD
+        ========================================= */
+
+    .medicine-card {
+        background: white;
+        border: 1px solid #e9edf3;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 30px rgba(31, 45, 61, .04);
+    }
+
+    .medicine-card-header {
+        display: flex;
+        align-items: center;
+        gap: .9rem;
+        padding: 1.25rem 1.4rem;
+        border-bottom: 1px solid #edf0f4;
+        background: #fbfcfe;
+    }
+
+    .medicine-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: #e8f1ff;
+        color: #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+    }
+
+    .medicine-img-preview {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        object-fit: cover;
+        border: 1px solid #e9edf3;
+    }
+
+    .medicine-card-header span {
+        display: block;
+        color: #8a93a3;
+        font-size: .7rem;
+        font-weight: 600;
+        margin-bottom: .15rem;
+    }
+
+    .medicine-card-header h4 {
+        margin: 0;
+        color: #172033;
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+
+    /* =========================================
+           DETAILS
+        ========================================= */
+
+    .medicine-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: .8rem;
+        padding: 1.2rem 1.4rem;
+        border-bottom: 1px solid #edf0f4;
+    }
+
+        .detail-item:nth-child(odd) {
+            border-left: 1px solid #edf0f4;
+        }
+
+        .detail-item:nth-last-child(-n+2) {
+            border-bottom: 0;
+        }
+
+    .detail-icon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border-radius: 11px;
+        background: #f1f4f8;
+        color: #667085;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .95rem;
+    }
+
+    .detail-content span {
+        display: block;
+        color: #929baa;
+        font-size: .68rem;
+        margin-bottom: .2rem;
+    }
+
+    .detail-content strong {
+        color: #293241;
+        font-size: .85rem;
+        font-weight: 800;
+    }
+
+    .stock-icon {
+        background: #e8f1ff;
+        color: #0d6efd;
+    }
+
+    .stock-value {
+        color: #0d6efd !important;
+    }
+
+        .stock-value small {
+            font-size: .65rem;
+            font-weight: 600;
+        }
+
+
+    /* =========================================
+           CONFIRMATION
+        ========================================= */
+
+    .confirmation-text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+        padding: 1rem;
+        color: #6c757d;
+        font-size: .78rem;
+    }
+
+        .confirmation-text i {
+            color: #16a34a;
+        }
+
+        .confirmation-text strong {
+            color: #172033;
+        }
+
+
+    /* =========================================
+           ACTIONS
+        ========================================= */
+
+    .status-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: .75rem;
+    }
+
+    .cancel-button,
+    .activate-button {
+        min-height: 50px;
+        border-radius: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+        font-size: .82rem;
+        font-weight: 800;
+        transition: all .2s ease;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .cancel-button {
+        background: white;
+        color: #667085;
+        border: 1px solid #dfe4ea;
+    }
+
+        .cancel-button:hover {
+            background: #f4f6f8;
+            color: #343a40;
+            transform: translateY(-2px);
+        }
+
+    .activate-button {
+        border: 0;
+        background: #16a34a;
+        color: white;
+        box-shadow: 0 8px 18px rgba(22, 163, 74, .18);
+    }
+
+        .activate-button:hover {
+            background: #15803d;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(22, 163, 74, .24);
+        }
+
+
+    /* =========================================
+           RESPONSIVE
+        ========================================= */
+
+    @@media (max-width: 600px) {
+
+        .status-page {
+            padding: 1.5rem .75rem;
+        }
+
+        .status-header {
+            padding: 1.2rem;
+        }
+
+        .status-icon {
+            width: 52px;
+            height: 52px;
+            min-width: 52px;
+            font-size: 1.35rem;
+        }
+
+        .status-header h2 {
+            font-size: 1.1rem;
+        }
+
+        .medicine-details {
+            grid-template-columns: 1fr;
+        }
+
+        .detail-item:nth-child(odd) {
+            border-left: 0;
+        }
+
+        .detail-item:nth-last-child(-n+2) {
+            border-bottom: 1px solid #edf0f4;
+        }
+
+        .detail-item:last-child {
+            border-bottom: 0;
+        }
+
+        .status-actions {
+            grid-template-columns: 1fr;
+        }
+    }
+
+</style>

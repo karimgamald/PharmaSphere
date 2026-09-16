@@ -1,0 +1,2328 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using PharmaSphere.Domain.Entities
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "الرئيسية - PharmaSphere";
+
+    var isAuthenticated = SignInManager.IsSignedIn(User);
+
+    var isAdmin = User.IsInRole("Admin");
+    var isPharmacist = User.IsInRole("Pharmacist");
+    var isDeliveryBoy = User.IsInRole("DeliveryBoy");
+    var isClient = User.IsInRole("Client");
+
+    var currentUser = isAuthenticated
+        ? await UserManager.GetUserAsync(User)
+        : null;
+
+    var displayName = currentUser?.FullName
+        ?? User.Identity?.Name
+        ?? "المستخدم";
+
+    var roleName =
+        isAdmin ? "مدير النظام" :
+        isPharmacist ? "صيدلي" :
+        isDeliveryBoy ? "مندوب توصيل" :
+        isClient ? "عميل" :
+        "مستخدم";
+}
+
+<div class="pharma-dashboard" dir="rtl">
+
+    <!-- =====================================================
+         HERO
+    ====================================================== -->
+
+    <section class="dashboard-hero">
+
+        <div class="hero-pattern"></div>
+
+        <div class="hero-content">
+
+            <div class="hero-text">
+
+                <div class="hero-status">
+
+                    <span class="status-dot"></span>
+
+                    <span>
+                        النظام يعمل بشكل طبيعي
+                    </span>
+
+                </div>
+
+
+                @if (isAuthenticated)
+                {
+                    <h1>
+                        مرحبًا
+                        <span>@displayName</span>
+                    </h1>
+
+                    <div class="role-badge">
+                        <i class="bi bi-person-badge"></i>
+                        @roleName
+                    </div>
+                }
+                else
+                {
+                    <h1>
+                        مرحبًا بك في
+                        <span>PharmaSphere</span>
+                    </h1>
+                }
+
+
+                <p>
+                    منصة متكاملة لإدارة الصيدلية،
+                    المبيعات، المخزون، التوريد، الطلبات،
+                    الوصفات الطبية والتقارير من مكان واحد.
+                </p>
+
+
+                <!-- =================================================
+                     HERO ACTIONS
+                ================================================== -->
+
+                <div class="hero-actions">
+
+                    @if (isAdmin || isPharmacist)
+                    {
+                        <a asp-controller="Pos"
+                           asp-action="Index"
+                           class="hero-primary-btn">
+
+                            <i class="bi bi-cash-register"></i>
+
+                            فتح نقطة البيع
+
+                        </a>
+
+                        <a asp-controller="Orders"
+                           asp-action="Index"
+                           class="hero-secondary-btn">
+
+                            <i class="bi bi-receipt"></i>
+
+                            إدارة الطلبات
+
+                        </a>
+                    }
+                    else if (isDeliveryBoy)
+                    {
+                        <a asp-controller="Delivery"
+                           asp-action="Index"
+                           class="hero-primary-btn">
+
+                            <i class="bi bi-truck"></i>
+
+                            طلبات التوصيل
+
+                        </a>
+
+                        <a asp-controller="Orders"
+                           asp-action="Index"
+                           class="hero-secondary-btn">
+
+                            <i class="bi bi-receipt"></i>
+
+                            الطلبات
+
+                        </a>
+                    }
+                    else if (isClient)
+                    {
+                        <a asp-controller="Shop"
+                           asp-action="Index"
+                           class="hero-primary-btn">
+
+                            <i class="bi bi-shop"></i>
+
+                            دخول المتجر
+
+                        </a>
+
+                        <a asp-controller="Orders"
+                           asp-action="Index"
+                           class="hero-secondary-btn">
+
+                            <i class="bi bi-receipt"></i>
+
+                            طلباتي
+
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account"
+                           asp-action="Login"
+                           class="hero-primary-btn">
+
+                            <i class="bi bi-box-arrow-in-left"></i>
+
+                            تسجيل الدخول
+
+                        </a>
+
+                        <a asp-controller="Account"
+                           asp-action="Register"
+                           class="hero-secondary-btn">
+
+                            <i class="bi bi-person-plus"></i>
+
+                            إنشاء حساب
+
+                        </a>
+                    }
+
+                </div>
+
+            </div>
+
+
+            <!-- =====================================================
+                 HERO VISUAL
+            ====================================================== -->
+
+            <div class="hero-visual">
+
+                <div class="hero-circle circle-one"></div>
+                <div class="hero-circle circle-two"></div>
+
+                <div class="hero-medical-icon">
+
+                    <i class="bi bi-heart-pulse"></i>
+
+                </div>
+
+
+                <div class="floating-card floating-card-one">
+
+                    <i class="bi bi-shield-check"></i>
+
+                    <div>
+
+                        <strong>
+                            نظام آمن
+                        </strong>
+
+                        <span>
+                            Protected
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="floating-card floating-card-two">
+
+                    <i class="bi bi-box-seam"></i>
+
+                    <div>
+
+                        <strong>
+                            إدارة المخزون
+                        </strong>
+
+                        <span>
+                            Inventory
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ADMIN / PHARMACIST QUICK ACCESS
+    ====================================================== -->
+
+    @if (isAdmin || isPharmacist)
+    {
+        <section class="dashboard-section">
+
+            <div class="section-header">
+
+                <span class="section-eyebrow">
+                    QUICK ACCESS
+                </span>
+
+                <h2>
+                    الوصول السريع
+                </h2>
+
+                <p>
+                    أهم العمليات اليومية داخل الصيدلية.
+                </p>
+
+            </div>
+
+
+            <div class="row g-3">
+
+                <!-- POS -->
+
+                <div class="col-12 col-sm-6 col-xl">
+
+                    <a asp-controller="Pos"
+                       asp-action="Index"
+                       class="quick-card">
+
+                        <div class="quick-icon blue">
+                            <i class="bi bi-cash-register"></i>
+                        </div>
+
+                        <div class="quick-info">
+
+                            <span>
+                                المبيعات
+                            </span>
+
+                            <strong>
+                                نقطة البيع POS
+                            </strong>
+
+                        </div>
+
+                        <div class="quick-arrow">
+                            <i class="bi bi-arrow-left"></i>
+                        </div>
+
+                    </a>
+
+                </div>
+
+
+                <!-- Orders -->
+
+                <div class="col-12 col-sm-6 col-xl">
+
+                    <a asp-controller="Orders"
+                       asp-action="Index"
+                       class="quick-card">
+
+                        <div class="quick-icon teal">
+                            <i class="bi bi-receipt-cutoff"></i>
+                        </div>
+
+                        <div class="quick-info">
+
+                            <span>
+                                الطلبات
+                            </span>
+
+                            <strong>
+                                إدارة الطلبات
+                            </strong>
+
+                        </div>
+
+                        <div class="quick-arrow">
+                            <i class="bi bi-arrow-left"></i>
+                        </div>
+
+                    </a>
+
+                </div>
+
+
+                <!-- Medicines -->
+
+                <div class="col-12 col-sm-6 col-xl">
+
+                    <a asp-controller="Medicine"
+                       asp-action="Index"
+                       class="quick-card">
+
+                        <div class="quick-icon red">
+                            <i class="bi bi-capsule-pill"></i>
+                        </div>
+
+                        <div class="quick-info">
+
+                            <span>
+                                المخزون
+                            </span>
+
+                            <strong>
+                                الأدوية والتشغيلات
+                            </strong>
+
+                        </div>
+
+                        <div class="quick-arrow">
+                            <i class="bi bi-arrow-left"></i>
+                        </div>
+
+                    </a>
+
+                </div>
+
+
+                <!-- Purchase -->
+
+                <div class="col-12 col-sm-6 col-xl">
+
+                    <a asp-controller="PurchaseOrders"
+                       asp-action="Create"
+                       class="quick-card">
+
+                        <div class="quick-icon orange">
+                            <i class="bi bi-truck"></i>
+                        </div>
+
+                        <div class="quick-info">
+
+                            <span>
+                                التوريد
+                            </span>
+
+                            <strong>
+                                فاتورة شراء جديدة
+                            </strong>
+
+                        </div>
+
+                        <div class="quick-arrow">
+                            <i class="bi bi-arrow-left"></i>
+                        </div>
+
+                    </a>
+
+                </div>
+
+
+                <!-- Reports -->
+
+                @if (isAdmin)
+                {
+                    <div class="col-12 col-sm-6 col-xl">
+
+                        <a asp-controller="Reports"
+                           asp-action="ProfitReport"
+                           class="quick-card">
+
+                            <div class="quick-icon green">
+                                <i class="bi bi-graph-up-arrow"></i>
+                            </div>
+
+                            <div class="quick-info">
+
+                                <span>
+                                    التحليلات
+                                </span>
+
+                                <strong>
+                                    التقارير المالية
+                                </strong>
+
+                            </div>
+
+                            <div class="quick-arrow">
+                                <i class="bi bi-arrow-left"></i>
+                            </div>
+
+                        </a>
+
+                    </div>
+                }
+
+            </div>
+
+        </section>
+    }
+
+
+    <!-- =====================================================
+         CLIENT DASHBOARD
+    ====================================================== -->
+
+    @if (isClient)
+    {
+        <section class="dashboard-section">
+
+            <div class="section-header">
+
+                <span class="section-eyebrow">
+                    CUSTOMER AREA
+                </span>
+
+                <h2>
+                    خدماتي
+                </h2>
+
+                <p>
+                    الوصول السريع إلى خدماتك وطلباتك.
+                </p>
+
+            </div>
+
+
+            <div class="row g-4">
+
+                <!-- Shop -->
+
+                <div class="col-md-6 col-lg-4">
+
+                    <a asp-controller="Shop"
+                       asp-action="Index"
+                       class="module-card client-module">
+
+                        <div class="module-header">
+
+                            <div class="module-icon blue">
+                                <i class="bi bi-shop"></i>
+                            </div>
+
+                            <span class="module-tag blue">
+                                STORE
+                            </span>
+
+                        </div>
+
+                        <h3>
+                            المتجر الإلكتروني
+                        </h3>
+
+                        <p>
+                            تصفح الأدوية والمنتجات المتاحة
+                            وأضف المنتجات إلى سلة الشراء.
+                        </p>
+
+                        <span class="module-link blue">
+
+                            فتح المتجر
+
+                            <i class="bi bi-arrow-left"></i>
+
+                        </span>
+
+                    </a>
+
+                </div>
+
+
+                <!-- Orders -->
+
+                <div class="col-md-6 col-lg-4">
+
+                    <a asp-controller="Orders"
+                       asp-action="Index"
+                       class="module-card client-module">
+
+                        <div class="module-header">
+
+                            <div class="module-icon teal">
+                                <i class="bi bi-receipt"></i>
+                            </div>
+
+                            <span class="module-tag teal">
+                                ORDERS
+                            </span>
+
+                        </div>
+
+                        <h3>
+                            طلباتي
+                        </h3>
+
+                        <p>
+                            متابعة طلباتك السابقة وحالة
+                            الطلب والدفع والتوصيل.
+                        </p>
+
+                        <span class="module-link teal">
+
+                            عرض طلباتي
+
+                            <i class="bi bi-arrow-left"></i>
+
+                        </span>
+
+                    </a>
+
+                </div>
+
+
+                <!-- Prescriptions -->
+
+                <div class="col-md-6 col-lg-4">
+
+                    <a asp-controller="Prescriptions"
+                       asp-action="Index"
+                       class="module-card client-module">
+
+                        <div class="module-header">
+
+                            <div class="module-icon purple">
+                                <i class="bi bi-file-earmark-medical"></i>
+                            </div>
+
+                            <span class="module-tag purple">
+                                MEDICAL
+                            </span>
+
+                        </div>
+
+                        <h3>
+                            الوصفات الطبية
+                        </h3>
+
+                        <p>
+                            متابعة الوصفات الطبية الخاصة
+                            بك وحالتها داخل الصيدلية.
+                        </p>
+
+                        <span class="module-link purple">
+
+                            عرض الوصفات
+
+                            <i class="bi bi-arrow-left"></i>
+
+                        </span>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+    }
+
+
+    <!-- =====================================================
+         DELIVERY DASHBOARD
+    ====================================================== -->
+
+    @if (isDeliveryBoy)
+    {
+        <section class="dashboard-section">
+
+            <div class="section-header">
+
+                <span class="section-eyebrow">
+                    DELIVERY OPERATIONS
+                </span>
+
+                <h2>
+                    عمليات التوصيل
+                </h2>
+
+                <p>
+                    متابعة الطلبات المسندة إليك وإدارة عمليات التوصيل.
+                </p>
+
+            </div>
+
+
+            <div class="row g-4">
+
+                <div class="col-md-6 col-lg-4">
+
+                    <a asp-controller="Delivery"
+                       asp-action="Index"
+                       class="module-card">
+
+                        <div class="module-header">
+
+                            <div class="module-icon orange">
+                                <i class="bi bi-truck"></i>
+                            </div>
+
+                            <span class="module-tag orange">
+                                DELIVERY
+                            </span>
+
+                        </div>
+
+                        <h3>
+                            طلبات التوصيل
+                        </h3>
+
+                        <p>
+                            عرض الطلبات المسندة إليك
+                            ومتابعة حالة التوصيل.
+                        </p>
+
+                        <span class="module-link orange">
+
+                            إدارة التوصيل
+
+                            <i class="bi bi-arrow-left"></i>
+
+                        </span>
+
+                    </a>
+
+                </div>
+
+
+                <div class="col-md-6 col-lg-4">
+
+                    <a asp-controller="Orders"
+                       asp-action="Index"
+                       class="module-card">
+
+                        <div class="module-header">
+
+                            <div class="module-icon teal">
+                                <i class="bi bi-receipt"></i>
+                            </div>
+
+                            <span class="module-tag teal">
+                                ORDERS
+                            </span>
+
+                        </div>
+
+                        <h3>
+                            الطلبات المسندة
+                        </h3>
+
+                        <p>
+                            مراجعة تفاصيل الطلبات المرتبطة
+                            بعمليات التوصيل.
+                        </p>
+
+                        <span class="module-link teal">
+
+                            عرض الطلبات
+
+                            <i class="bi bi-arrow-left"></i>
+
+                        </span>
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+    }
+
+
+    <!-- =====================================================
+         ADMIN / PHARMACIST CORE MODULES
+    ====================================================== -->
+
+    @if (isAdmin || isPharmacist)
+    {
+        <section class="dashboard-section">
+
+            <div class="section-header section-header-flex">
+
+                <div>
+
+                    <span class="section-eyebrow">
+                        CORE MODULES
+                    </span>
+
+                    <h2>
+                        إدارة الصيدلية
+                    </h2>
+
+                    <p>
+                        الوحدات الأساسية للعمليات اليومية.
+                    </p>
+
+                </div>
+
+
+                <div class="module-counter">
+
+                    <strong>
+                        @(isAdmin ? "12" : "9")
+                    </strong>
+
+                    <span>
+                        وحدات
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="row g-4">
+
+                <!-- POS -->
+
+                <div class="col-md-6 col-lg-3">
+
+                    <div class="module-card">
+
+                        <div class="module-header">
+
+                            <div class="module-icon blue">
+                                <i class="bi bi-display"></i>
+                            </div>
+
+                            <span class="module-tag blue">
+                                المبيعات
+                            </span>
+
+                        </div>
+
+                        <h3>
+                            شاشة الكاشير
+                        </h3>
+
+                        <p>
+                            تنفيذ عمليات البيع وإدارة الكميات
+                            وتطبيق استراتيجية FEFO.
+                        </p>
+
+                        <a asp-controller="Pos"
+                           asp-action="Index"
+                           class="module-link blue">
+
+                            فتح شاشة البيع
+
+                            <i class="bi bi-arrow-left"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Orders -->
+
+                <div class="col-md-6 col-lg-3">
+
+                    <div class="module-card">
+
+                        <div class="module-header">
+
+                            <div class="module-icon teal">
+                                <i class="bi bi-receipt"></i>
+                            </div>
+
+                            <span class="module-tag teal">
+                                الطلبات
+                            </span>
+
+                        </div>
+
+                        <h3>
+                            إدارة الطلبات
+                        </h3>
+
+                        <p>
+                            متابعة الطلبات ومراجعة حالتها
+                            وتفاصيل المنتجات والدفع.
+                        </p>
+
+                        <a asp-controller="Orders"
+                           asp-action="Index"
+                           class="module-link teal">
+
+                            عرض الطلبات
+
+                            <i class="bi bi-arrow-left"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Medicines -->
+
+                <div class="col-md-6 col-lg-3">
+
+                    <div class="module-card">
+
+                        <div class="module-header">
+
+                            <div class="module-icon red">
+                                <i class="bi bi-capsule"></i>
+                            </div>
+
+                            <span class="module-tag red">
+                                المخزون
+                            </span>
+
+                        </div>
+
+                        <h3>
+                            إدارة الأدوية
+                        </h3>
+
+                        <p>
+                            إدارة الأدوية والمواد الفعالة
+                            والتشغيلات وتواريخ الصلاحية.
+                        </p>
+
+                        <a asp-controller="Medicine"
+                           asp-action="Index"
+                           class="module-link red">
+
+                            إدارة الأدوية
+
+                            <i class="bi bi-arrow-left"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Categories -->
+
+                <div class="col-md-6 col-lg-3">
+
+                    <div class="module-card">
+
+                        <div class="module-header">
+
+                            <div class="module-icon purple">
+                                <i class="bi bi-tags"></i>
+                            </div>
+
+                            <span class="module-tag purple">
+                                التصنيفات
+                            </span>
+
+                        </div>
+
+                        <h3>
+                            التصنيفات الدوائية
+                        </h3>
+
+                        <p>
+                            تنظيم الأدوية داخل تصنيفات واضحة
+                            لتسهيل الإدارة والبحث.
+                        </p>
+
+                        <a asp-controller="Categories"
+                           asp-action="Index"
+                           class="module-link purple">
+
+                            عرض التصنيفات
+
+                            <i class="bi bi-arrow-left"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Suppliers -->
+
+                <div class="col-md-6 col-lg-3">
+
+                    <div class="module-card">
+
+                        <div class="module-header">
+
+                            <div class="module-icon dark">
+                                <i class="bi bi-building"></i>
+                            </div>
+
+                            <span class="module-tag dark">
+                                الموردون
+                            </span>
+
+                        </div>
+
+                        <h3>
+                            إدارة الموردين
+                        </h3>
+
+                        <p>
+                            إدارة بيانات الموردين وربطهم
+                            بعمليات التوريد.
+                        </p>
+
+                        <a asp-controller="Suppliers"
+                           asp-action="Index"
+                           class="module-link dark">
+
+                            قائمة الموردين
+
+                            <i class="bi bi-arrow-left"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Purchase -->
+
+                <div class="col-md-6 col-lg-3">
+
+                    <div class="module-card">
+
+                        <div class="module-header">
+
+                            <div class="module-icon orange">
+                                <i class="bi bi-truck-front"></i>
+                            </div>
+
+                            <span class="module-tag orange">
+                                التوريد
+                            </span>
+
+                        </div>
+
+                        <h3>
+                            فواتير التوريد
+                        </h3>
+
+                        <p>
+                            تسجيل الشحنات والكميات وأسعار
+                            الشراء وتواريخ الصلاحية.
+                        </p>
+
+                        <a asp-controller="PurchaseOrders"
+                           asp-action="Create"
+                           class="module-link orange">
+
+                            تسجيل شحنة
+
+                            <i class="bi bi-arrow-left"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Prescriptions -->
+
+                <div class="col-md-6 col-lg-3">
+
+                    <div class="module-card">
+
+                        <div class="module-header">
+
+                            <div class="module-icon teal">
+                                <i class="bi bi-file-earmark-medical"></i>
+                            </div>
+
+                            <span class="module-tag teal">
+                                طبي
+                            </span>
+
+                        </div>
+
+                        <h3>
+                            إدارة الروشتات
+                        </h3>
+
+                        <p>
+                            مراجعة الوصفات الطبية المرفوعة
+                            ومتابعة حالتها.
+                        </p>
+
+                        <a asp-controller="Prescriptions"
+                           asp-action="Index"
+                           class="module-link teal">
+
+                            استعراض الروشتات
+
+                            <i class="bi bi-arrow-left"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Reports Admin only -->
+
+                @if (isAdmin)
+                {
+                    <div class="col-md-6 col-lg-3">
+
+                        <div class="module-card">
+
+                            <div class="module-header">
+
+                                <div class="module-icon green">
+                                    <i class="bi bi-bar-chart-line"></i>
+                                </div>
+
+                                <span class="module-tag green">
+                                    التقارير
+                                </span>
+
+                            </div>
+
+                            <h3>
+                                التقارير المالية
+                            </h3>
+
+                            <p>
+                                تحليل المبيعات والتكاليف والأرباح
+                                اعتمادًا على تكلفة الـBatch.
+                            </p>
+
+                            <a asp-controller="Reports"
+                               asp-action="ProfitReport"
+                               class="module-link green">
+
+                                عرض التقارير
+
+                                <i class="bi bi-arrow-left"></i>
+
+                            </a>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+
+        </section>
+    }
+
+
+    <!-- =====================================================
+         ADVANCED OPERATIONS
+    ====================================================== -->
+
+    @if (isAdmin || isPharmacist)
+    {
+        <section class="dashboard-section">
+
+            <div class="section-header">
+
+                <span class="section-eyebrow">
+                    OPERATIONS & CONTROL
+                </span>
+
+                <h2>
+                    العمليات المتقدمة
+                </h2>
+
+                <p>
+                    أدوات التحكم في المخزون والمرتجعات
+                    والمراجعة والعمليات الداخلية.
+                </p>
+
+            </div>
+
+
+            <div class="row g-4">
+
+                <!-- Batches -->
+
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="advanced-card">
+
+                        <div class="advanced-icon blue">
+                            <i class="bi bi-calendar2-check"></i>
+                        </div>
+
+                        <div>
+
+                            <span class="advanced-label">
+                                FEFO
+                            </span>
+
+                            <h3>
+                                إدارة التشغيلات
+                            </h3>
+
+                            <p>
+                                متابعة كل Batch بشكل مستقل
+                                وصرف الأقرب انتهاءً أولًا.
+                            </p>
+
+                            <a asp-controller="MedicineBatches"
+                               asp-action="Index">
+
+                                إدارة التشغيلات
+
+                                <i class="bi bi-arrow-left"></i>
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Substitutes -->
+
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="advanced-card">
+
+                        <div class="advanced-icon teal">
+                            <i class="bi bi-search"></i>
+                        </div>
+
+                        <div>
+
+                            <span class="advanced-label">
+                                ACTIVE INGREDIENT
+                            </span>
+
+                            <h3>
+                                البدائل الدوائية
+                            </h3>
+
+                            <p>
+                                البحث عن الأدوية التي تحتوي
+                                على نفس المادة الفعالة والتركيز.
+                            </p>
+
+                            <a asp-controller="Medicine"
+                               asp-action="Substitutes">
+
+                                البحث عن البدائل
+
+                                <i class="bi bi-arrow-left"></i>
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Stock -->
+
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="advanced-card">
+
+                        <div class="advanced-icon green">
+                            <i class="bi bi-boxes"></i>
+                        </div>
+
+                        <div>
+
+                            <span class="advanced-label">
+                                STOCK CONTROL
+                            </span>
+
+                            <h3>
+                                مراقبة المخزون
+                            </h3>
+
+                            <p>
+                                متابعة حركة الكميات الناتجة
+                                عن البيع والتوريد والمرتجعات.
+                            </p>
+
+                            <a asp-controller="Medicine"
+                               asp-action="Index">
+
+                                مراجعة المخزون
+
+                                <i class="bi bi-arrow-left"></i>
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Units -->
+
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="advanced-card">
+
+                        <div class="advanced-icon red">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+
+                        <div>
+
+                            <span class="advanced-label">
+                                UNIT SELLING
+                            </span>
+
+                            <h3>
+                                إعدادات الوحدات
+                            </h3>
+
+                            <p>
+                                إدارة وحدات البيع للدواء والربط
+                                بين العبوة والوحدات الداخلية.
+                            </p>
+
+                            <a asp-controller="Medicine"
+                               asp-action="UnitUnitsConfig">
+
+                                إعدادات الوحدات
+
+                                <i class="bi bi-arrow-left"></i>
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Returns -->
+
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="advanced-card">
+
+                        <div class="advanced-icon orange">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </div>
+
+                        <div>
+
+                            <span class="advanced-label">
+                                RETURNS
+                            </span>
+
+                            <h3>
+                                المرتجعات والتسويات
+                            </h3>
+
+                            <p>
+                                إدارة المرتجعات وتسجيل الكميات
+                                المعادة وتأثيرها على المخزون.
+                            </p>
+
+                            <a asp-controller="Returns"
+                               asp-action="Index">
+
+                                إدارة المرتجعات
+
+                                <i class="bi bi-arrow-left"></i>
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Audit Admin only -->
+
+                @if (isAdmin)
+                {
+                    <div class="col-md-6 col-lg-4">
+
+                        <div class="advanced-card">
+
+                            <div class="advanced-icon purple">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+
+                            <div>
+
+                                <span class="advanced-label">
+                                    SECURITY
+                                </span>
+
+                                <h3>
+                                    سجل العمليات
+                                </h3>
+
+                                <p>
+                                    تتبع العمليات والتغييرات الحساسة
+                                    داخل النظام لأغراض المراجعة والأمان.
+                                </p>
+
+                                <a asp-controller="AuditLog"
+                                   asp-action="Index">
+
+                                    عرض سجل الأنشطة
+
+                                    <i class="bi bi-arrow-left"></i>
+
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+
+        </section>
+    }
+
+
+    <!-- =====================================================
+         PLATFORM CAPABILITIES
+         Visible to authenticated users
+    ====================================================== -->
+
+    @if (isAuthenticated)
+    {
+        <section class="capabilities-section">
+
+            <div class="capabilities-header">
+
+                <span>
+                    PHARMASPHERE PLATFORM
+                </span>
+
+                <h2>
+                    نظام إدارة صيدلية متكامل
+                </h2>
+
+                <p>
+                    يجمع PharmaSphere بين إدارة المخزون
+                    والبيع والتوريد والطلبات والتحليلات
+                    في نظام واحد قابل للتوسع.
+                </p>
+
+            </div>
+
+
+            <div class="row g-4">
+
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="capability-card">
+
+                        <span class="capability-number">
+                            01
+                        </span>
+
+                        <div class="capability-icon">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+
+                        <h3>
+                            FEFO & Batch Management
+                        </h3>
+
+                        <p>
+                            إدارة مستقلة لكل MedicineBatch
+                            مع تطبيق First Expired,
+                            First Out أثناء عمليات البيع.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="capability-card">
+
+                        <span class="capability-number">
+                            02
+                        </span>
+
+                        <div class="capability-icon">
+                            <i class="bi bi-calculator"></i>
+                        </div>
+
+                        <h3>
+                            دقة حساب الأرباح
+                        </h3>
+
+                        <p>
+                            الاحتفاظ بتكلفة الشراء وسعر البيع
+                            على مستوى الـBatch للحصول على حساب
+                            أكثر دقة لهامش الربح.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="capability-card">
+
+                        <span class="capability-number">
+                            03
+                        </span>
+
+                        <div class="capability-icon">
+                            <i class="bi bi-capsule"></i>
+                        </div>
+
+                        <h3>
+                            Generic Substitution
+                        </h3>
+
+                        <p>
+                            البحث عن الأدوية البديلة اعتمادًا
+                            على المادة الفعالة والتركيز.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="capability-card">
+
+                        <span class="capability-number">
+                            04
+                        </span>
+
+                        <div class="capability-icon">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </div>
+
+                        <h3>
+                            Stock Tracking
+                        </h3>
+
+                        <p>
+                            تسجيل حركة المخزون من خلال عمليات
+                            الشراء والبيع والمرتجعات والتسويات.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="capability-card">
+
+                        <span class="capability-number">
+                            05
+                        </span>
+
+                        <div class="capability-icon">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+
+                        <h3>
+                            Unit Selling
+                        </h3>
+
+                        <p>
+                            دعم إدارة الوحدات والعبوات باستخدام
+                            UnitsPerBox لتسهيل عمليات البيع.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-6 col-lg-4">
+
+                    <div class="capability-card featured">
+
+                        <span class="capability-number">
+                            06
+                        </span>
+
+                        <div class="capability-icon">
+                            <i class="bi bi-receipt"></i>
+                        </div>
+
+                        <h3>
+                            Order Management
+                        </h3>
+
+                        <p>
+                            إدارة طلبات العملاء ومتابعة حالتها
+                            وتفاصيل المنتجات والدفع والتسليم.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+    }
+
+</div>
+
+
+<style>
+
+    /* =========================================================
+       BASE
+    ========================================================= */
+
+    .pharma-dashboard {
+        min-height: 100vh;
+        padding: 1.5rem;
+        background: #f5f7fb;
+        color: #172033;
+    }
+
+    .pharma-dashboard a {
+        text-decoration: none;
+    }
+
+    .dashboard-section {
+        margin-top: 2.75rem;
+    }
+
+
+    /* =========================================================
+       HERO
+    ========================================================= */
+
+    .dashboard-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 28px;
+        padding: 3.25rem;
+        background: linear-gradient(
+            135deg,
+            #0d6efd 0%,
+            #0756c9 55%,
+            #063d91 100%
+        );
+        color: white;
+        box-shadow: 0 20px 50px rgba(13,110,253,.18);
+    }
+
+    .hero-pattern {
+        position: absolute;
+        inset: 0;
+        opacity: .08;
+        background-image:
+            linear-gradient(
+                rgba(255,255,255,.5) 1px,
+                transparent 1px
+            ),
+            linear-gradient(
+                90deg,
+                rgba(255,255,255,.5) 1px,
+                transparent 1px
+            );
+        background-size: 40px 40px;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 3rem;
+    }
+
+    .hero-text {
+        max-width: 760px;
+    }
+
+    .hero-status {
+        display: inline-flex;
+        align-items: center;
+        gap: .65rem;
+        padding: .5rem .9rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(255,255,255,.2);
+        border-radius: 50px;
+        background: rgba(255,255,255,.1);
+        font-size: .78rem;
+        font-weight: 700;
+        backdrop-filter: blur(8px);
+    }
+
+    .status-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #20c997;
+        box-shadow: 0 0 0 5px rgba(32,201,151,.14);
+    }
+
+    .hero-text h1 {
+        margin: 0 0 .7rem;
+        font-size: clamp(2.1rem,4vw,3.25rem);
+        font-weight: 900;
+        letter-spacing: -.8px;
+    }
+
+    .hero-text h1 span {
+        color: #c9e2ff;
+    }
+
+    .hero-text p {
+        max-width: 680px;
+        margin: 0;
+        color: rgba(255,255,255,.78);
+        font-size: .98rem;
+        line-height: 1.9;
+    }
+
+    .role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        margin-bottom: 1rem;
+        padding: .35rem .7rem;
+        border-radius: 50px;
+        background: rgba(255,255,255,.12);
+        border: 1px solid rgba(255,255,255,.2);
+        color: rgba(255,255,255,.9);
+        font-size: .7rem;
+        font-weight: 800;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: .75rem;
+        margin-top: 1.75rem;
+        flex-wrap: wrap;
+    }
+
+    .hero-primary-btn,
+    .hero-secondary-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: .55rem;
+        padding: .75rem 1.1rem;
+        border-radius: 12px;
+        font-size: .82rem;
+        font-weight: 800;
+        transition: .25s ease;
+    }
+
+    .hero-primary-btn {
+        background: white;
+        color: #0d6efd;
+    }
+
+    .hero-secondary-btn {
+        color: white;
+        background: rgba(255,255,255,.1);
+        border: 1px solid rgba(255,255,255,.2);
+    }
+
+    .hero-primary-btn:hover,
+    .hero-secondary-btn:hover {
+        transform: translateY(-2px);
+    }
+
+
+    /* =========================================================
+       HERO VISUAL
+    ========================================================= */
+
+    .hero-visual {
+        position: relative;
+        width: 270px;
+        height: 220px;
+        flex-shrink: 0;
+    }
+
+    .hero-circle {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255,255,255,.07);
+    }
+
+    .circle-one {
+        width: 220px;
+        height: 220px;
+        top: 0;
+        right: 10px;
+    }
+
+    .circle-two {
+        width: 140px;
+        height: 140px;
+        bottom: -20px;
+        left: 0;
+    }
+
+    .hero-medical-icon {
+        position: absolute;
+        top: 48px;
+        right: 75px;
+        width: 105px;
+        height: 105px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 30px;
+        background: rgba(255,255,255,.13);
+        border: 1px solid rgba(255,255,255,.2);
+        font-size: 3.4rem;
+        transform: rotate(-5deg);
+        backdrop-filter: blur(8px);
+    }
+
+    .floating-card {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        gap: .65rem;
+        padding: .65rem .8rem;
+        border-radius: 13px;
+        background: rgba(255,255,255,.13);
+        border: 1px solid rgba(255,255,255,.17);
+        backdrop-filter: blur(10px);
+        font-size: .7rem;
+    }
+
+    .floating-card i {
+        font-size: 1rem;
+    }
+
+    .floating-card strong,
+    .floating-card span {
+        display: block;
+    }
+
+    .floating-card span {
+        margin-top: 2px;
+        color: rgba(255,255,255,.6);
+        font-size: .62rem;
+    }
+
+    .floating-card-one {
+        top: 10px;
+        left: 0;
+    }
+
+    .floating-card-two {
+        right: 0;
+        bottom: 8px;
+    }
+
+
+    /* =========================================================
+       SECTION HEADERS
+    ========================================================= */
+
+    .section-header {
+        margin-bottom: 1.4rem;
+    }
+
+    .section-header-flex {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .section-eyebrow {
+        display: block;
+        margin-bottom: .35rem;
+        color: #0d6efd;
+        font-size: .65rem;
+        font-weight: 900;
+        letter-spacing: 1.6px;
+    }
+
+    .section-header h2 {
+        margin: 0 0 .3rem;
+        font-size: 1.35rem;
+        font-weight: 900;
+    }
+
+    .section-header p {
+        margin: 0;
+        color: #7c8798;
+        font-size: .82rem;
+    }
+
+    .module-counter {
+        display: flex;
+        align-items: baseline;
+        gap: .4rem;
+        padding: .55rem .85rem;
+        background: white;
+        border: 1px solid #e5eaf1;
+        border-radius: 12px;
+    }
+
+    .module-counter strong {
+        color: #0d6efd;
+        font-size: 1.1rem;
+    }
+
+    .module-counter span {
+        color: #8b95a5;
+        font-size: .72rem;
+    }
+
+
+    /* =========================================================
+       QUICK CARDS
+    ========================================================= */
+
+    .quick-card {
+        min-height: 108px;
+        display: flex;
+        align-items: center;
+        gap: .95rem;
+        padding: 1.15rem;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #e5eaf1;
+        border-radius: 17px;
+        background: white;
+        transition: .25s ease;
+    }
+
+    .quick-card::after {
+        content: "";
+        position: absolute;
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        left: -45px;
+        bottom: -45px;
+        background: #f7f9fc;
+    }
+
+    .quick-card:hover {
+        transform: translateY(-4px);
+        border-color: #d6deea;
+        box-shadow: 0 16px 35px rgba(25,40,65,.08);
+    }
+
+    .quick-icon {
+        width: 54px;
+        height: 54px;
+        min-width: 54px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 15px;
+        font-size: 1.35rem;
+    }
+
+    .quick-info {
+        position: relative;
+        z-index: 2;
+    }
+
+    .quick-info span {
+        display: block;
+        margin-bottom: .25rem;
+        color: #8c96a6;
+        font-size: .7rem;
+        font-weight: 700;
+    }
+
+    .quick-info strong {
+        display: block;
+        color: #1b2638;
+        font-size: .9rem;
+        font-weight: 800;
+    }
+
+    .quick-arrow {
+        position: relative;
+        z-index: 2;
+        margin-right: auto;
+        color: #aab3c0;
+        transition: .2s ease;
+    }
+
+    .quick-card:hover .quick-arrow {
+        transform: translateX(-4px);
+        color: #0d6efd;
+    }
+
+
+    /* =========================================================
+       COLORS
+    ========================================================= */
+
+    .blue {
+        background: #eaf2ff;
+        color: #0d6efd;
+    }
+
+    .red {
+        background: #fff0f1;
+        color: #dc3545;
+    }
+
+    .orange {
+        background: #fff5df;
+        color: #c48600;
+    }
+
+    .green {
+        background: #e8f7f0;
+        color: #198754;
+    }
+
+    .purple {
+        background: #f4eaff;
+        color: #7e22ce;
+    }
+
+    .dark {
+        background: #eef0f3;
+        color: #343a40;
+    }
+
+    .teal {
+        background: #e5f8fa;
+        color: #087f8c;
+    }
+
+
+    /* =========================================================
+       MODULE CARDS
+    ========================================================= */
+
+    .module-card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        padding: 1.45rem;
+        border: 1px solid #e5eaf1;
+        border-radius: 20px;
+        background: white;
+        transition: .25s ease;
+    }
+
+    .module-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 18px 42px rgba(27,43,68,.08);
+    }
+
+    .module-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+    }
+
+    .module-icon {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        font-size: 1.3rem;
+    }
+
+    .module-tag {
+        padding: .38rem .65rem;
+        border-radius: 50px;
+        font-size: .62rem;
+        font-weight: 800;
+    }
+
+    .module-card h3 {
+        margin: 0 0 .55rem;
+        font-size: 1rem;
+        font-weight: 900;
+    }
+
+    .module-card p {
+        flex-grow: 1;
+        margin: 0 0 1.3rem;
+        color: #7d8797;
+        font-size: .78rem;
+        line-height: 1.85;
+    }
+
+    .module-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: .7rem .8rem;
+        border-radius: 10px;
+        font-size: .75rem;
+        font-weight: 800;
+    }
+
+
+    /* =========================================================
+       ADVANCED CARDS
+    ========================================================= */
+
+    .advanced-card {
+        height: 100%;
+        display: flex;
+        gap: 1rem;
+        padding: 1.35rem;
+        border: 1px solid #e5eaf1;
+        border-radius: 18px;
+        background: white;
+        transition: .25s ease;
+    }
+
+    .advanced-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 35px rgba(25,40,65,.07);
+    }
+
+    .advanced-icon {
+        width: 50px;
+        height: 50px;
+        min-width: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        font-size: 1.25rem;
+    }
+
+    .advanced-label {
+        color: #98a1af;
+        font-size: .6rem;
+        font-weight: 900;
+        letter-spacing: .8px;
+    }
+
+    .advanced-card h3 {
+        margin: .25rem 0 .45rem;
+        font-size: .95rem;
+        font-weight: 900;
+    }
+
+    .advanced-card p {
+        margin: 0 0 .7rem;
+        color: #7c8797;
+        font-size: .76rem;
+        line-height: 1.75;
+    }
+
+    .advanced-card a {
+        color: #0d6efd;
+        font-size: .73rem;
+        font-weight: 800;
+    }
+
+    .advanced-card a i {
+        margin-right: .25rem;
+    }
+
+
+    /* =========================================================
+       CAPABILITIES
+    ========================================================= */
+
+    .capabilities-section {
+        margin-top: 4rem;
+        padding: 3rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 28px;
+        background: white;
+    }
+
+    .capabilities-header {
+        max-width: 720px;
+        margin: 0 auto 2.5rem;
+        text-align: center;
+    }
+
+    .capabilities-header span {
+        color: #0d6efd;
+        font-size: .65rem;
+        font-weight: 900;
+        letter-spacing: 1.8px;
+    }
+
+    .capabilities-header h2 {
+        margin: .5rem 0 .75rem;
+        font-size: 1.8rem;
+        font-weight: 900;
+    }
+
+    .capabilities-header p {
+        margin: 0;
+        color: #7c8797;
+        font-size: .83rem;
+        line-height: 1.85;
+    }
+
+    .capability-card {
+        position: relative;
+        height: 100%;
+        overflow: hidden;
+        padding: 1.5rem;
+        border: 1px solid #e6ebf2;
+        border-radius: 18px;
+        background: #f8faff;
+        transition: .25s ease;
+    }
+
+    .capability-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 35px rgba(25,40,65,.06);
+    }
+
+    .capability-card.featured {
+        border-color: #cfe2ff;
+        background: linear-gradient(
+            135deg,
+            #f0f6ff,
+            #f8fbff
+        );
+    }
+
+    .capability-number {
+        position: absolute;
+        top: .75rem;
+        left: 1rem;
+        color: #e1e8f3;
+        font-size: 2rem;
+        font-weight: 900;
+    }
+
+    .capability-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        border-radius: 13px;
+        background: #eaf2ff;
+        color: #0d6efd;
+        font-size: 1.25rem;
+    }
+
+    .capability-card h3 {
+        margin: 0 0 .55rem;
+        font-size: .93rem;
+        font-weight: 900;
+    }
+
+    .capability-card p {
+        margin: 0;
+        color: #7c8797;
+        font-size: .76rem;
+        line-height: 1.8;
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+
+    @@media (max-width: 1199px) {
+
+        .quick-card {
+            min-height: 100px;
+        }
+    }
+
+    @@media (max-width: 991px) {
+
+        .dashboard-hero {
+            padding: 2.5rem;
+        }
+
+        .hero-visual {
+            width: 220px;
+            transform: scale(.9);
+        }
+
+        .capabilities-section {
+            padding: 2rem;
+        }
+    }
+
+    @@media (max-width: 767px) {
+
+        .pharma-dashboard {
+            padding: 1rem;
+        }
+
+        .dashboard-section {
+            margin-top: 2.25rem;
+        }
+
+        .dashboard-hero {
+            padding: 1.75rem;
+            border-radius: 22px;
+        }
+
+        .hero-content {
+            display: block;
+        }
+
+        .hero-visual {
+            display: none;
+        }
+
+        .hero-text h1 {
+            font-size: 1.9rem;
+        }
+
+        .hero-text p {
+            font-size: .83rem;
+        }
+
+        .hero-actions {
+            flex-direction: column;
+        }
+
+        .hero-primary-btn,
+        .hero-secondary-btn {
+            justify-content: center;
+        }
+
+        .section-header-flex {
+            align-items: flex-start;
+        }
+
+        .module-counter {
+            display: none;
+        }
+
+        .advanced-card {
+            padding: 1.15rem;
+        }
+
+        .capabilities-section {
+            margin-top: 3rem;
+            padding: 1.4rem;
+            border-radius: 22px;
+        }
+
+        .capabilities-header h2 {
+            font-size: 1.4rem;
+        }
+    }
+
+</style>

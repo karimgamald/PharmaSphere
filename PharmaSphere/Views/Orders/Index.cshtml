@@ -1,0 +1,887 @@
+﻿@using PharmaSphere.Domain.Enums
+@model IEnumerable<PharmaSphere.Domain.Entities.Order>
+
+@{
+    ViewData["Title"] = "إدارة طلبات المبيعات";
+
+    var orders = Model?.ToList()
+        ?? new List<PharmaSphere.Domain.Entities.Order>();
+
+    var totalOrders = orders.Count;
+
+    var onlineOrders = orders.Count(x =>
+        x.OrderType == OrderType.Online_Delivery);
+
+    var posOrders = orders.Count(x =>
+        x.OrderType == OrderType.POS_InStore);
+
+    var paidOrders = orders.Count(x =>
+        x.PaymentStatus == PaymentStatus.Paid);
+
+    var pendingOrders = orders.Count(x =>
+        x.OrderStatus == OrderStatus.Pending);
+
+    var completedOrders = orders.Count(x =>
+        x.OrderStatus == OrderStatus.Completed);
+
+    var cancelledOrders = orders.Count(x =>
+        x.OrderStatus == OrderStatus.Cancelled);
+
+    var totalSales = orders.Sum(x => x.TotalAmount);
+}
+
+<div class="container-fluid py-4" dir="rtl">
+
+    <!-- ================= PAGE HEADER ================= -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+
+                <div class="page-icon">
+                    <i class="bi bi-bag-check"></i>
+                </div>
+
+                <h3 class="fw-bold text-dark mb-0">
+                    إدارة طلبات المبيعات
+                </h3>
+
+            </div>
+
+            <p class="text-muted small mb-0">
+                متابعة الطلبات، تحديث حالتها، وإدارة عمليات الإلغاء والمبيعات.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- ================= STATISTICS ================= -->
+    <div class="row g-3 mb-4">
+
+        <!-- Total Orders -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="stat-card">
+
+                <div class="stat-icon primary">
+                    <i class="bi bi-receipt"></i>
+                </div>
+
+                <div>
+                    <span class="stat-label">
+                        إجمالي الطلبات
+                    </span>
+
+                    <h4 class="fw-bold mb-0">
+                        @totalOrders
+                    </h4>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Pending -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="stat-card">
+
+                <div class="stat-icon warning">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+
+                <div>
+                    <span class="stat-label">
+                        قيد الانتظار
+                    </span>
+
+                    <h4 class="fw-bold mb-0">
+                        @pendingOrders
+                    </h4>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Completed -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="stat-card">
+
+                <div class="stat-icon success">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+
+                <div>
+                    <span class="stat-label">
+                        الطلبات المكتملة
+                    </span>
+
+                    <h4 class="fw-bold mb-0">
+                        @completedOrders
+                    </h4>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Total Sales -->
+        <div class="col-xl-3 col-md-6">
+
+            <div class="stat-card">
+
+                <div class="stat-icon money">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+
+                <div>
+                    <span class="stat-label">
+                        إجمالي المبيعات
+                    </span>
+
+                    <h4 class="fw-bold text-success mb-0">
+                        @totalSales.ToString("N2")
+                        <small class="fs-6 fw-normal">
+                            جنيه
+                        </small>
+                    </h4>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= EXTRA SUMMARY ================= -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="mini-stat">
+                <div class="mini-icon info">
+                    <i class="bi bi-globe2"></i>
+                </div>
+
+                <div>
+                    <span>طلبات أونلاين</span>
+                    <strong>@onlineOrders</strong>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="mini-stat">
+                <div class="mini-icon dark">
+                    <i class="bi bi-shop"></i>
+                </div>
+
+                <div>
+                    <span>مبيعات POS</span>
+                    <strong>@posOrders</strong>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="mini-stat">
+                <div class="mini-icon success">
+                    <i class="bi bi-credit-card"></i>
+                </div>
+
+                <div>
+                    <span>طلبات مدفوعة</span>
+                    <strong>@paidOrders</strong>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="mini-stat">
+                <div class="mini-icon danger">
+                    <i class="bi bi-x-circle"></i>
+                </div>
+
+                <div>
+                    <span>طلبات ملغاة</span>
+                    <strong>@cancelledOrders</strong>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= ORDERS TABLE ================= -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+        <!-- Table Header -->
+        <div class="card-header bg-white border-0 p-4">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+
+                        <i class="bi bi-list-check text-primary me-2"></i>
+
+                        قائمة الطلبات
+
+                    </h5>
+
+                    <span class="text-muted small">
+                        @totalOrders طلب مسجل في النظام
+                    </span>
+
+                </div>
+
+
+                <div class="d-flex flex-wrap gap-2">
+
+                    @if (pendingOrders > 0)
+                    {
+                        <span class="badge status-warning rounded-pill px-3 py-2">
+
+                            <i class="bi bi-clock me-1"></i>
+
+                            @pendingOrders قيد الانتظار
+
+                        </span>
+                    }
+
+
+                    @if (paidOrders > 0)
+                    {
+                        <span class="badge status-success rounded-pill px-3 py-2">
+
+                            <i class="bi bi-check-circle-fill me-1"></i>
+
+                            @paidOrders مدفوع
+
+                        </span>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Table -->
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th class="px-4">
+                            رقم الطلب
+                        </th>
+
+                        <th>
+                            النوع
+                        </th>
+
+                        <th>
+                            التاريخ
+                        </th>
+
+                        <th>
+                            العميل
+                        </th>
+
+                        <th>
+                            الإجمالي
+                        </th>
+
+                        <th>
+                            حالة الطلب
+                        </th>
+
+                        <th>
+                            حالة الدفع
+                        </th>
+
+                        <th class="text-end px-4">
+                            الإجراءات
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @if (orders.Any())
+                    {
+                        foreach (var order in orders)
+                        {
+                            <tr>
+
+                                <!-- ================= ORDER NUMBER ================= -->
+                                <td class="px-4">
+
+                                    <div class="fw-bold text-primary">
+                                        #@order.OrderNumber
+                                    </div>
+
+                                    <small class="text-muted">
+                                        ID: @order.Id
+                                    </small>
+
+                                </td>
+
+
+                                <!-- ================= ORDER TYPE ================= -->
+                                <td>
+
+                                    @if (order.OrderType == OrderType.POS_InStore)
+                                    {
+                                        <span class="badge bg-dark-subtle text-dark border border-dark-subtle rounded-pill px-3 py-2">
+
+                                            <i class="bi bi-shop me-1"></i>
+
+                                            POS
+
+                                        </span>
+                                    }
+                                    else if (order.OrderType == OrderType.Online_Delivery)
+                                    {
+                                        <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3 py-2">
+
+                                            <i class="bi bi-globe2 me-1"></i>
+
+                                            أونلاين
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3 py-2">
+
+                                            @order.OrderType
+
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- ================= DATE ================= -->
+                                <td>
+
+                                    <div class="fw-semibold">
+                                        @order.OrderDate.ToLocalTime().ToString("dd/MM/yyyy")
+                                    </div>
+
+                                    <small class="text-muted">
+                                        @order.OrderDate.ToLocalTime().ToString("hh:mm tt")
+                                    </small>
+
+                                </td>
+
+
+                                <!-- ================= CUSTOMER ================= -->
+                                <td>
+
+                                    @if (order.Client?.UserName != null)
+                                    {
+                                        <div class="d-flex align-items-center gap-2">
+
+                                            <div class="customer-avatar">
+                                                <i class="bi bi-person"></i>
+                                            </div>
+
+                                            <span class="fw-semibold">
+                                                @order.Client.UserName
+                                            </span>
+
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+
+                                            <i class="bi bi-person-badge me-1"></i>
+
+                                            عميل مباشر
+
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- ================= TOTAL ================= -->
+                                <td>
+
+                                    <div class="fw-bold text-success">
+
+                                        @order.TotalAmount.ToString("N2")
+
+                                        <small class="fw-normal">
+                                            جنيه
+                                        </small>
+
+                                    </div>
+
+                                    @if (order.DeliveryFee > 0)
+                                    {
+                                        <small class="text-muted">
+
+                                            شامل
+                                            @order.DeliveryFee.ToString("N2")
+                                            جنيه توصيل
+
+                                        </small>
+                                    }
+
+                                </td>
+
+
+                                <!-- ================= ORDER STATUS ================= -->
+                                <td>
+
+                                    @switch (order.OrderStatus)
+                                    {
+                                        case OrderStatus.Pending:
+
+                                            <span class="badge status-warning rounded-pill px-3 py-2">
+
+                                                <i class="bi bi-clock me-1"></i>
+
+                                                قيد الانتظار
+
+                                            </span>
+
+                                            break;
+
+
+                                        case OrderStatus.Preparing:
+
+                                            <span class="badge status-info rounded-pill px-3 py-2">
+
+                                                <i class="bi bi-box-seam me-1"></i>
+
+                                                قيد التجهيز
+
+                                            </span>
+
+                                            break;
+
+
+                                        case OrderStatus.OutForDelivery:
+
+                                            <span class="badge status-primary rounded-pill px-3 py-2">
+
+                                                <i class="bi bi-truck me-1"></i>
+
+                                                خرج للتوصيل
+
+                                            </span>
+
+                                            break;
+
+
+                                        case OrderStatus.Completed:
+
+                                            <span class="badge status-success rounded-pill px-3 py-2">
+
+                                                <i class="bi bi-check-circle me-1"></i>
+
+                                                مكتمل
+
+                                            </span>
+
+                                            break;
+
+
+                                        case OrderStatus.Cancelled:
+
+                                            <span class="badge status-danger rounded-pill px-3 py-2">
+
+                                                <i class="bi bi-x-circle me-1"></i>
+
+                                                ملغي
+
+                                            </span>
+
+                                            break;
+
+
+                                        default:
+
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3 py-2">
+
+                                                @order.OrderStatus
+
+                                            </span>
+
+                                            break;
+                                    }
+
+                                </td>
+
+
+                                <!-- ================= PAYMENT STATUS ================= -->
+                                <td>
+
+                                    @if (order.PaymentStatus == PaymentStatus.Paid)
+                                    {
+                                        <span class="badge status-success rounded-pill px-3 py-2">
+
+                                            <i class="bi bi-check-circle-fill me-1"></i>
+
+                                            مدفوع
+
+                                        </span>
+                                    }
+                                    else if (order.PaymentStatus == PaymentStatus.Unpaid)
+                                    {
+                                        <span class="badge status-warning rounded-pill px-3 py-2">
+
+                                            <i class="bi bi-hourglass-split me-1"></i>
+
+                                            غير مدفوع
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3 py-2">
+
+                                            @order.PaymentStatus
+
+                                        </span>
+                                    }
+
+                                </td>
+
+
+                                <!-- ================= ACTIONS ================= -->
+                                <td class="text-end px-4">
+
+                                    <div class="d-flex justify-content-end gap-2">
+
+                                        <!-- Details -->
+                                        <a asp-action="Details"
+                                           asp-route-id="@order.Id"
+                                           class="btn btn-sm btn-outline-primary rounded-3"
+                                           title="عرض التفاصيل">
+
+                                            <i class="bi bi-eye"></i>
+
+                                        </a>
+
+
+                                        <!-- Update Status -->
+                                        @if (order.OrderStatus != OrderStatus.Completed &&
+                                             order.OrderStatus != OrderStatus.Cancelled)
+                                        {
+                                            <a asp-action="UpdateStatus"
+                                               asp-route-id="@order.Id"
+                                               class="btn btn-sm btn-outline-warning rounded-3"
+                                               title="تحديث حالة الطلب">
+
+                                                <i class="bi bi-arrow-repeat"></i>
+
+                                            </a>
+                                        }
+
+
+                                        <!-- Cancel -->
+                                        @if (order.OrderStatus == OrderStatus.Pending)
+                                        {
+                                            <a asp-action="Cancel"
+                                               asp-route-id="@order.Id"
+                                               class="btn btn-sm btn-outline-danger rounded-3"
+                                               title="إلغاء الطلب">
+
+                                                <i class="bi bi-x-lg"></i>
+
+                                            </a>
+                                        }
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+
+                            <td colspan="8" class="text-center py-5">
+
+                                <div class="empty-state">
+
+                                    <div class="empty-icon">
+
+                                        <i class="bi bi-bag-x"></i>
+
+                                    </div>
+
+                                    <h5 class="fw-bold text-dark mt-3">
+                                        لا توجد طلبات
+                                    </h5>
+
+                                    <p class="text-muted mb-0">
+                                        لا توجد طلبات مبيعات مسجلة في النظام حاليًا.
+                                    </p>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+    /* ================= PAGE ICON ================= */
+
+    .page-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+
+    /* ================= STAT CARDS ================= */
+
+    .stat-card {
+        background: #fff;
+        border: 1px solid #edf0f2;
+        border-radius: 18px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        height: 100%;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 21px;
+        flex-shrink: 0;
+    }
+
+        .stat-icon.primary {
+            background: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+        }
+
+        .stat-icon.warning {
+            background: rgba(255, 193, 7, 0.12);
+            color: #997404;
+        }
+
+        .stat-icon.success {
+            background: rgba(25, 135, 84, 0.1);
+            color: #198754;
+        }
+
+        .stat-icon.money {
+            background: rgba(32, 201, 151, 0.1);
+            color: #198754;
+        }
+
+
+    /* ================= MINI STATS ================= */
+
+    .mini-stat {
+        background: #fff;
+        border: 1px solid #edf0f2;
+        border-radius: 16px;
+        padding: 15px 18px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 2px 7px rgba(0, 0, 0, 0.025);
+    }
+
+        .mini-stat span {
+            display: block;
+            color: #6c757d;
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+
+        .mini-stat strong {
+            font-size: 18px;
+        }
+
+    .mini-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+        .mini-icon.info {
+            background: rgba(13, 202, 240, 0.1);
+            color: #087990;
+        }
+
+        .mini-icon.dark {
+            background: rgba(33, 37, 41, 0.08);
+            color: #212529;
+        }
+
+        .mini-icon.success {
+            background: rgba(25, 135, 84, 0.1);
+            color: #198754;
+        }
+
+        .mini-icon.danger {
+            background: rgba(220, 53, 69, 0.1);
+            color: #b02a37;
+        }
+
+
+    /* ================= CUSTOMER ================= */
+
+    .customer-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+
+    /* ================= STATUS ================= */
+
+    .status-success {
+        background: rgba(25, 135, 84, 0.1);
+        color: #198754;
+        border: 1px solid rgba(25, 135, 84, 0.2);
+    }
+
+    .status-warning {
+        background: rgba(255, 193, 7, 0.12);
+        color: #997404;
+        border: 1px solid rgba(255, 193, 7, 0.2);
+    }
+
+    .status-info {
+        background: rgba(13, 202, 240, 0.1);
+        color: #087990;
+        border: 1px solid rgba(13, 202, 240, 0.2);
+    }
+
+    .status-primary {
+        background: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+        border: 1px solid rgba(13, 110, 253, 0.2);
+    }
+
+    .status-danger {
+        background: rgba(220, 53, 69, 0.1);
+        color: #b02a37;
+        border: 1px solid rgba(220, 53, 69, 0.2);
+    }
+
+
+    /* ================= TABLE ================= */
+
+    .table > :not(caption) > * > * {
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.15s ease;
+    }
+
+
+    /* ================= BUTTONS ================= */
+
+    .btn {
+        transition: all 0.2s ease;
+    }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+    .btn-outline-warning {
+        color: #997404;
+        border-color: rgba(255, 193, 7, 0.5);
+    }
+
+        .btn-outline-warning:hover {
+            color: #fff;
+        }
+
+
+    /* ================= EMPTY STATE ================= */
+
+    .empty-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 20px;
+        background: #f8f9fa;
+        color: #adb5bd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        margin: auto;
+    }
+
+</style>

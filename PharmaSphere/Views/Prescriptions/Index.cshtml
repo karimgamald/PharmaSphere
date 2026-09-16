@@ -1,0 +1,483 @@
+﻿@using PharmaSphere.Domain.Enums
+@model IEnumerable<PharmaSphere.Domain.Entities.Prescription>
+
+@{
+    ViewData["Title"] = "إدارة الروشتات الطبية";
+
+    var prescriptions = Model?.ToList()
+        ?? new List<PharmaSphere.Domain.Entities.Prescription>();
+
+    var totalPrescriptions = prescriptions.Count;
+
+    var pendingCount = prescriptions.Count(x =>
+        x.Status.ToString().Equals("PendingReview", StringComparison.OrdinalIgnoreCase) ||
+        x.Status.ToString().Equals("Pending", StringComparison.OrdinalIgnoreCase));
+
+    var approvedCount = prescriptions.Count(x =>
+        x.Status.ToString().Equals("Approved", StringComparison.OrdinalIgnoreCase) ||
+        x.Status.ToString().Equals("Accepted", StringComparison.OrdinalIgnoreCase) ||
+        x.Status.ToString().Equals("Confirmed", StringComparison.OrdinalIgnoreCase));
+
+    var rejectedCount = prescriptions.Count(x =>
+        x.Status.ToString().Equals("Rejected", StringComparison.OrdinalIgnoreCase) ||
+        x.Status.ToString().Equals("Declined", StringComparison.OrdinalIgnoreCase));
+}
+
+<div dir="rtl">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-file-earmark-medical text-primary me-2"></i>
+                إدارة الروشتات الطبية
+            </h3>
+
+            <p class="text-muted mb-0">
+                مراجعة ومتابعة الروشتات الطبية المرفوعة من العملاء.
+            </p>
+        </div>
+
+        <a asp-action="Upload"
+           class="btn btn-primary rounded-3 px-4 py-2 shadow-sm fw-bold">
+            <i class="bi bi-cloud-arrow-up me-1"></i>
+            رفع روشتة جديدة
+        </a>
+
+    </div>
+
+
+    <!-- Statistics -->
+    <div class="row g-3 mb-4">
+
+        <!-- Total -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <p class="text-muted mb-1 small">
+                                إجمالي الروشتات
+                            </p>
+
+                            <h3 class="fw-bold mb-0">
+                                @totalPrescriptions
+                            </h3>
+                        </div>
+
+                        <div class="rounded-3 bg-primary-subtle text-primary p-3">
+                            <i class="bi bi-files fs-4"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Pending -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <p class="text-muted mb-1 small">
+                                قيد المراجعة
+                            </p>
+
+                            <h3 class="fw-bold mb-0 text-warning">
+                                @pendingCount
+                            </h3>
+                        </div>
+
+                        <div class="rounded-3 bg-warning-subtle text-warning p-3">
+                            <i class="bi bi-hourglass-split fs-4"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Approved -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <p class="text-muted mb-1 small">
+                                الروشتات المقبولة
+                            </p>
+
+                            <h3 class="fw-bold mb-0 text-success">
+                                @approvedCount
+                            </h3>
+                        </div>
+
+                        <div class="rounded-3 bg-success-subtle text-success p-3">
+                            <i class="bi bi-check-circle fs-4"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Rejected -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <p class="text-muted mb-1 small">
+                                الروشتات المرفوضة
+                            </p>
+
+                            <h3 class="fw-bold mb-0 text-danger">
+                                @rejectedCount
+                            </h3>
+                        </div>
+
+                        <div class="rounded-3 bg-danger-subtle text-danger p-3">
+                            <i class="bi bi-x-circle fs-4"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Main Table -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+        <!-- Card Header -->
+        <div class="card-header bg-white border-0 p-4">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-list-check text-primary me-2"></i>
+                        قائمة الروشتات
+                    </h5>
+
+                    <small class="text-muted">
+                        جميع الروشتات المسجلة في النظام
+                    </small>
+                </div>
+
+                <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">
+                    @totalPrescriptions روشتة
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            @if (prescriptions.Any())
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th class="px-4 py-3">
+                                    #
+                                </th>
+
+                                <th class="py-3">
+                                    الروشتة
+                                </th>
+
+                                <th class="py-3">
+                                    العميل
+                                </th>
+
+                                <th class="py-3">
+                                    الطلب
+                                </th>
+
+                                <th class="py-3">
+                                    تاريخ الرفع
+                                </th>
+
+                                <th class="py-3">
+                                    الحالة
+                                </th>
+
+                                <th class="text-end px-4 py-3">
+                                    الإجراءات
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var item in prescriptions)
+                            {
+                                var statusName = item.Status.ToString();
+
+                                <tr>
+
+                                    <!-- ID -->
+                                    <td class="px-4">
+                                        <span class="text-muted fw-semibold">
+                                            #@item.Id
+                                        </span>
+                                    </td>
+
+
+                                    <!-- Prescription -->
+                                    <td>
+
+                                        <div class="d-flex align-items-center gap-3">
+
+                                            @if (!string.IsNullOrWhiteSpace(item.ImagePath))
+                                            {
+                                                <div class="rounded-3 border bg-light overflow-hidden"
+                                                     style="width:55px;height:55px;">
+
+                                                    @if (
+                                                        item.ImagePath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                                                        item.ImagePath.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                                                        item.ImagePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+                                                        item.ImagePath.EndsWith(".webp", StringComparison.OrdinalIgnoreCase)
+                                                    )
+                                                    {
+                                                        <img src="@item.ImagePath"
+                                                             alt="الروشتة الطبية"
+                                                             style="width:100%;height:100%;object-fit:cover;" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                                                            <i class="bi bi-file-earmark-pdf text-danger fs-4"></i>
+                                                        </div>
+                                                    }
+
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="rounded-3 bg-light border d-flex align-items-center justify-content-center"
+                                                     style="width:55px;height:55px;">
+
+                                                    <i class="bi bi-file-earmark-medical text-muted fs-4"></i>
+
+                                                </div>
+                                            }
+
+                                            <div>
+
+                                                <div class="fw-bold text-dark">
+                                                    روشتة طبية
+                                                </div>
+
+                                                <small class="text-muted">
+                                                    رقم #@item.Id
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- Client -->
+                                    <td>
+
+                                        <div class="fw-semibold text-dark">
+                                            @(item.Client?.UserName ?? item.ClientId)
+                                        </div>
+
+                                        @if (item.Client?.Email != null)
+                                        {
+                                            <small class="text-muted">
+                                                @item.Client.Email
+                                            </small>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Order -->
+                                    <td>
+
+                                        @if (item.Order != null)
+                                        {
+                                            <span class="badge bg-light text-dark border rounded-pill px-3">
+                                                #@item.Order.OrderNumber
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">
+                                                بدون طلب مرتبط
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Upload Date -->
+                                    <td>
+
+                                        <div class="fw-semibold text-dark">
+                                            @item.UploadedAt.ToLocalTime().ToString("dd/MM/yyyy")
+                                        </div>
+
+                                        <small class="text-muted">
+                                            @item.UploadedAt.ToLocalTime().ToString("hh:mm tt")
+                                        </small>
+
+                                    </td>
+
+
+                                    <!-- Status -->
+                                    <td>
+
+                                        @if (
+                                            statusName.Equals("PendingReview", StringComparison.OrdinalIgnoreCase) ||
+                                            statusName.Equals("Pending", StringComparison.OrdinalIgnoreCase)
+                                        )
+                                        {
+                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-2">
+                                                <i class="bi bi-clock me-1"></i>
+                                                قيد المراجعة
+                                            </span>
+                                        }
+                                        else if (
+                                            statusName.Equals("Approved", StringComparison.OrdinalIgnoreCase) ||
+                                            statusName.Equals("Accepted", StringComparison.OrdinalIgnoreCase) ||
+                                            statusName.Equals("Confirmed", StringComparison.OrdinalIgnoreCase)
+                                        )
+                                        {
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2">
+                                                <i class="bi bi-check-circle me-1"></i>
+                                                مقبولة
+                                            </span>
+                                        }
+                                        else if (
+                                            statusName.Equals("Rejected", StringComparison.OrdinalIgnoreCase) ||
+                                            statusName.Equals("Declined", StringComparison.OrdinalIgnoreCase)
+                                        )
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-2">
+                                                <i class="bi bi-x-circle me-1"></i>
+                                                مرفوضة
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3 py-2">
+                                                @statusName
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- Actions -->
+                                    <td class="text-end px-4">
+
+                                        <div class="d-flex justify-content-end gap-2">
+
+                                            @if (!string.IsNullOrWhiteSpace(item.ImagePath))
+                                            {
+                                                <a href="@item.ImagePath"
+                                                   target="_blank"
+                                                   class="btn btn-sm btn-outline-secondary rounded-3"
+                                                   title="عرض الروشتة">
+
+                                                    <i class="bi bi-eye"></i>
+
+                                                </a>
+                                            }
+
+                                            <a asp-action="Details"
+                                               asp-route-id="@item.Id"
+                                               class="btn btn-sm btn-primary rounded-3 px-3">
+
+                                                <i class="bi bi-clipboard2-check me-1"></i>
+                                                مراجعة
+
+                                            </a>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <!-- Empty State -->
+
+                <div class="text-center py-5">
+
+                    <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center mb-3"
+                         style="width:80px;height:80px;">
+
+                        <i class="bi bi-file-earmark-medical fs-1"></i>
+
+                    </div>
+
+                    <h5 class="fw-bold text-dark">
+                        لا توجد روشتات طبية
+                    </h5>
+
+                    <p class="text-muted mb-4">
+                        لم يتم تسجيل أي روشتات طبية في النظام حتى الآن.
+                    </p>
+
+                    <a asp-action="Upload"
+                       class="btn btn-primary rounded-3 px-4">
+
+                        <i class="bi bi-cloud-arrow-up me-1"></i>
+                        رفع روشتة
+
+                    </a>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
