@@ -58,59 +58,7 @@ PharmaSphere
 │
 └── PharmaSphere.Web
     └── MVC Controllers, Views and UI
-```
 
-## ⚙️ Getting Started
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/YOUR_USERNAME/PharmaSphere.git
-```
-
-### 2. Open the solution
-
-Open:
-
-```text
-PharmaSphere.sln
-```
-
-using Visual Studio.
-
-### 3. Configure the database
-
-Update the connection string in your local configuration.
-
-Do not commit real passwords, API keys, or production connection strings.
-
-### 4. Apply migrations
-
-Run:
-
-```bash
-dotnet ef database update
-```
-
-or run the application if the project is configured to apply migrations automatically.
-
-### 5. Run the application
-
-Press:
-
-```text
-F5
-```
-
-or run:
-
-```bash
-dotnet run
-```
-
-## 📌 Project Status
-
-🚧 The project is under active development.
 
 ## 👨‍💻 Author
 
