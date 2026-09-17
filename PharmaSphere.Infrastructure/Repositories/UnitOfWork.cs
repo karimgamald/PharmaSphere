@@ -18,6 +18,7 @@ namespace PharmaSphere.Infrastructure.Repositories
             _context = context;
 
             Medicines = new GenericRepository<Medicine>(_context);
+            AuditLogs = new GenericRepository<AuditLog>(_context);
             MedicineBatches = new GenericRepository<MedicineBatch>(_context);
 
             Categories = new GenericRepository<Category>(_context);
@@ -47,6 +48,7 @@ namespace PharmaSphere.Infrastructure.Repositories
         // =========================
 
         public IGenericRepository<Medicine> Medicines { get; private set; }
+        public IGenericRepository<AuditLog> AuditLogs { get; private set; }
 
         public IGenericRepository<MedicineBatch> MedicineBatches { get; private set; }
 

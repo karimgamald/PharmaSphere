@@ -1,0 +1,88 @@
+﻿@model PharmaSphere.Domain.Entities.AuditLog
+
+@{
+    ViewData["Title"] = "تفاصيل العملية";
+}
+
+<div class="container py-4">
+
+    <div class="card border-0 shadow-sm rounded-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between mb-4">
+
+                <h3 class="fw-bold">
+                    <i class="bi bi-journal-text text-primary"></i>
+                    تفاصيل العملية
+                </h3>
+
+                <a asp-action="Index"
+                   class="btn btn-outline-secondary rounded-3">
+
+                    <i class="bi bi-arrow-right"></i>
+                    العودة
+
+                </a>
+
+            </div>
+
+            <div class="row g-4">
+
+                <div class="col-md-6">
+                    <label class="text-muted">العملية</label>
+                    <div class="fw-bold">@Model.Action</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="text-muted">التاريخ</label>
+                    <div class="fw-bold">
+                        @Model.CreatedAt.ToLocalTime()
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="text-muted">العنصر</label>
+                    <div class="fw-bold">@Model.EntityName</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="text-muted">رقم العنصر</label>
+                    <div class="fw-bold">
+                        @(Model.EntityId ?? "-")
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="text-muted">المستخدم</label>
+                    <div class="fw-bold">
+                        @(Model.User?.FullName ?? "النظام")
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="text-muted">IP Address</label>
+                    <div class="fw-bold">
+                        @(Model.IpAddress ?? "-")
+                    </div>
+                </div>
+
+                <div class="col-12">
+
+                    <label class="text-muted">
+                        الوصف
+                    </label>
+
+                    <div class="bg-light rounded-3 p-3 mt-1">
+                        @(Model.Description ?? "لا يوجد وصف")
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

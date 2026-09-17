@@ -305,7 +305,24 @@ namespace PharmaSphere.Web.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+        [HttpGet]
+        public async Task<IActionResult> UnitUnitsConfig()
+        {
+            var medicines = await _unitOfWork.Medicines.GetAllAsync();
 
+            var model = medicines
+                .Select(x => new UnitUnitsConfigViewModel
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    ScientificName = x.ScientificName,
+                    Barcode = x.Barcode,
+                    UnitsPerBox = x.UnitsPerBox
+                })
+                .ToList();
+
+            return View(model);
+        }
         // Helper method
         private async Task LoadCategories(
             MedicineFormViewModel model)

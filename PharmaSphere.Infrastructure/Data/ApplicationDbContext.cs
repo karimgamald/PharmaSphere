@@ -16,8 +16,9 @@ namespace PharmaSphere.Infrastructure.Data
         // =========================
         // Medicines & Inventory
         // =========================
-
+        //public DbSet<ApplicationUser> Users { get; set; }
         public DbSet<Medicine> Medicines { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
 
         public DbSet<MedicineBatch> MedicineBatches { get; set; }
 

@@ -1,0 +1,151 @@
+﻿@model IEnumerable<PharmaSphere.Domain.Entities.AuditLog>
+
+@{
+    ViewData["Title"] = "سجل العمليات";
+}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-journal-text text-primary"></i>
+                سجل العمليات
+            </h2>
+
+            <p class="text-muted mb-0">
+                متابعة العمليات والتغييرات التي تمت داخل النظام
+            </p>
+        </div>
+
+        <span class="badge bg-primary fs-6">
+            @Model.Count() عملية
+        </span>
+
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>المستخدم</th>
+                            <th>العملية</th>
+                            <th>العنصر</th>
+                            <th>الوصف</th>
+                            <th>IP</th>
+                            <th></th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="7"
+                                    class="text-center py-5 text-muted">
+
+                                    <i class="bi bi-journal-x fs-1 d-block mb-3"></i>
+
+                                    لا توجد عمليات مسجلة حتى الآن.
+
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var log in Model)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <div class="fw-semibold">
+                                            @log.CreatedAt.ToLocalTime()
+                                                .ToString("yyyy/MM/dd")
+                                        </div>
+
+                                        <small class="text-muted">
+                                            @log.CreatedAt.ToLocalTime()
+                                                .ToString("HH:mm")
+                                        </small>
+                                    </td>
+
+                                    <td>
+                                        @if (log.User != null)
+                                        {
+                                            <span>
+                                                @log.User.FullName
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                النظام
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            @log.Action
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="fw-semibold">
+                                            @log.EntityName
+                                        </span>
+
+                                        @if (!string.IsNullOrEmpty(log.EntityId))
+                                        {
+                                            <small class="text-muted">
+                                                #@log.EntityId
+                                            </small>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @(log.Description ?? "-")
+                                    </td>
+
+                                    <td>
+                                        <small class="text-muted">
+                                            @(log.IpAddress ?? "-")
+                                        </small>
+                                    </td>
+
+                                    <td>
+                                        <a asp-action="Details"
+                                           asp-route-id="@log.Id"
+                                           class="btn btn-sm btn-outline-primary rounded-3">
+
+                                            <i class="bi bi-eye"></i>
+
+                                        </a>
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

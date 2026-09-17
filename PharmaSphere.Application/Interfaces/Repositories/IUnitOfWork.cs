@@ -8,6 +8,7 @@ namespace PharmaSphere.Application.Interfaces.Repositories
     public interface IUnitOfWork : IDisposable
     {
         IGenericRepository<Medicine> Medicines { get; }
+        IGenericRepository<AuditLog> AuditLogs { get; }
         IGenericRepository<MedicineBatch> MedicineBatches { get; }
 
         IGenericRepository<Category> Categories { get; }
